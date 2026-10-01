@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WF-05 | SOC Intelligence Orchestrator</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 32px 20px;
+    background: #f2f5fa;
+    color: #172c4e;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+main {
+    max-width: 1120px;
+    margin: auto;
+    background: #ffffff;
+    border: 1px solid #e4eaf2;
+    border-radius: 12px;
+    padding: 32px;
+    box-shadow: 0 6px 28px rgba(25, 48, 83, .05);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+h1 {
+    margin: 0;
+    color: #112a50;
+    font-size: 27px;
+    line-height: 1.25;
+}
+
+.subtitle {
+    margin: 5px 0 0;
+    color: #61748f;
+    font-size: 15px;
+}
+
+.date {
+    padding: 12px 18px;
+    background: #f3f6fa;
+    border-radius: 8px;
+    color: #526680;
+    white-space: nowrap;
+}
+
+.notice {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    background: #edf4ff;
+    border: 1px solid #c5dcff;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 26px;
+}
+
+.notice-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    background: #dceafe;
+    color: #1265c8;
+    font-size: 25px;
+}
+
+.notice strong {
+    color: #174a94;
+}
+
+.notice p {
+    margin: 4px 0 0;
+}
+
+h2 {
+    margin: 0 0 12px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #102a50;
+}
+
+.section {
+    padding: 18px 0;
+    border-bottom: 1px solid #e1e8f0;
+}
+
+.section:first-of-type {
+    padding-top: 0;
+}
+
+.section p {
+    margin: 0 0 0 28px;
+    color: #40546f;
+}
+
+.meta {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.meta-card {
+    min-width: 0;
+    background: #f5f7fa;
+    border: 1px solid #e9eef5;
+    border-radius: 7px;
+    padding: 14px 17px;
+}
+
+.meta-label {
+    display: block;
+    color: #708099;
+    font-size: 12px;
+    margin-bottom: 3px;
+}
+
+.meta-value {
+    display: block;
+    font-weight: 600;
+    color: #18345e;
+    overflow-wrap: anywhere;
+}
+
+.meta-value.regular {
+    font-weight: 400;
+}
+
+.content {
+    margin-left: 28px;
+}
+
+.content p {
+    margin: 0;
+}
+
+ul {
+    margin: 4px 0;
+    padding-left: 20px;
+    color: #40546f;
+}
+
+.info {
+    background: #f5f8fc;
+    border-radius: 7px;
+    padding: 14px 18px;
+}
+
+.note {
+    margin-top: 9px !important;
+    margin-left: 0 !important;
+    font-size: 12px;
+    color: #6a7e97 !important;
+}
+
+.bottom-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 16px;
+    margin-top: 22px;
+}
+
+.bottom-card {
+    min-width: 0;
+    padding: 20px;
+    background: #f4f8ff;
+    border: 1px solid #dbe9fd;
+    border-radius: 8px;
+}
+
+.bottom-card.version {
+    background: #f1faf5;
+    border-color: #d7eee0;
+}
+
+.bottom-card h2 {
+    font-size: 16px;
+}
+
+.trace {
+    display: grid;
+    grid-template-columns: 155px minmax(0, 1fr);
+    gap: 5px 12px;
+    font-size: 12px;
+}
+
+.trace strong {
+    color: #38516e;
+}
+
+.trace span {
+    overflow-wrap: anywhere;
+}
+
+.bottom-card p {
+    margin: 0;
+    font-size: 13px;
+    color: #40546f;
+}
+
+footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    border-top: 1px solid #e1e8f0;
+    padding-top: 18px;
+    margin-top: 25px;
+    font-size: 12px;
+    color: #728199;
+}
+
+@media (max-width: 760px) {
+    body {
+        padding: 10px;
+    }
+
+    main {
+        padding: 20px;
+    }
+
+    .header,
+    footer {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .date {
+        white-space: normal;
+    }
+
+    .meta {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .bottom-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .meta {
+        grid-template-columns: 1fr;
+    }
+
+    .trace {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media print {
+    body {
+        background: white;
+        padding: 0;
+    }
+
+    main {
+        border: 0;
+        box-shadow: none;
+        max-width: none;
+        padding: 8px;
+    }
+
+    .meta-card,
+    .bottom-card,
+    .notice {
+        break-inside: avoid;
+    }
+}
+</style>
+</head>
+
+<body>
+<main>
+
+<header class="header">
+    <div>
+        <h1>SOC Intelligence Orchestrator</h1>
+        <p class="subtitle">
+            WF-05 | Relatório de análise assistiva
+        </p>
+    </div>
+
+    <div class="date">
+        <strong>Gerado em:</strong><br>
+        01/10/2026<br>
+        <strong>16:39:39</strong><br>
+        <small>UTC-0300</small>
+        <hr style="border:0;border-top:1px solid #dce4ef;margin:8px 0;">
+        <strong>Ambiente:</strong> LAB<br>
+        <strong>Origem:</strong> WF-04 / MOCK
+    </div>
+</header>
+
+<div class="notice">
+    <div class="notice-icon" aria-hidden="true">&#9881;</div>
+
+    <div>
+        <strong>LABORATORIO - ANALISE SIMULADA</strong>
+        <p>
+            Este documento utiliza uma resposta simulada do WF-04.
+            O n8n não executou uma chamada real ao Ollama.
+            Nenhuma ação operacional foi realizada.
+        </p>
+    </div>
+</div>
+
+<section class="section">
+    <h2>Identificação</h2>
+
+    <div class="meta">
+
+        <div class="meta-card">
+            <span class="meta-label">Evento</span>
+            <span class="meta-value">
+                LAB-0001
+            </span>
+        </div>
+
+        <div class="meta-card">
+            <span class="meta-label">Queue ID</span>
+            <span class="meta-value">
+                13
+            </span>
+        </div>
+
+        <div class="meta-card">
+            <span class="meta-label">Versão analisada</span>
+            <span class="meta-value">
+                2
+            </span>
+        </div>
+
+        <div class="meta-card">
+            <span class="meta-label">Investigação</span>
+            <span class="meta-value regular">
+                8eb57aa6-8249-4b48-bfe9-c00bb0d324d9
+            </span>
+        </div>
+
+        <div class="meta-card">
+            <span class="meta-label">Status</span>
+            <span class="meta-value">
+                ANALYSIS_COMPLETED
+            </span>
+        </div>
+
+        <div class="meta-card">
+            <span class="meta-label">Modelo declarado</span>
+            <span class="meta-value regular">
+                qwen3:4b-instruct
+                (resposta MOCK)
+            </span>
+        </div>
+
+    </div>
+</section>
+
+<section class="section">
+    <h2>Resumo da análise</h2>
+    <div class="content">
+        <p>Evento sintetico LAB-0001 encaminhado para revisao humana.</p>
+    </div>
+</section>
+
+<section class="section">
+    <h2>Avaliação assistiva</h2>
+    <div class="content">
+        <p>Existem duas evidencias registradas. As correlacoes sao informativas e nao comprovam um mesmo incidente.</p>
+    </div>
+</section>
+
+<section class="section">
+    <h2>Referências das evidências</h2>
+
+    <div class="content info">
+        <ul>
+            <li>LAB-EV-001</li>
+<li>LAB-EV-002</li>
+        </ul>
+
+        <p class="note">
+            O contrato WF-04 fornece somente as referências
+            das evidências. O conteúdo original deverá ser
+            consultado durante a revisão humana.
+        </p>
+    </div>
+</section>
+
+<section class="section">
+    <h2>Limitações da análise</h2>
+
+    <div class="content">
+        <ul>
+            <li>Dados exclusivamente sinteticos.</li>
+<li>Sem comprovacao de atividade maliciosa.</li>
+        </ul>
+    </div>
+</section>
+
+<section class="section">
+    <h2>Sugestões para revisão humana</h2>
+
+    <div class="content">
+        <ul>
+            <li>Revisar as evidencias do evento.</li>
+        </ul>
+    </div>
+</section>
+
+<div class="bottom-grid">
+
+    <div class="bottom-card">
+        <h2>Rastreabilidade</h2>
+
+        <div class="trace">
+            <strong>Base declarada:</strong>
+            <span>soc_intelligence</span>
+
+            <strong>Tabela declarada:</strong>
+            <span>investigation_versions</span>
+
+            <strong>Versão:</strong>
+            <span>2</span>
+
+            <strong>Assinatura:</strong>
+            <span>30a180b436306e413da458a3d2d307a864e3a812cc0460dc689c1ee97dbf7978</span>
+        </div>
+    </div>
+
+    <div class="bottom-card version">
+        <h2>Controle de versões</h2>
+
+        <p>
+            A versão
+            <strong>1</strong>
+            (queue 12)
+            foi classificada como
+            <strong>SKIPPED</strong>
+            e não foi incluída na análise.
+        </p>
+    </div>
+
+</div>
+
+<footer>
+    <span>SOC Intelligence Orchestrator | Ambiente LAB</span>
+
+    <span>
+        Revisão humana obrigatória.
+        Documento sem finalidade operacional.
+    </span>
+</footer>
+
+</main>
+</body>
+</html>

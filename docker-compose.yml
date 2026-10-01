@@ -1,0 +1,30 @@
+name: soc-intelligence-lab
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: soc_intelligence
+      POSTGRES_USER: soc_lab
+      POSTGRES_PASSWORD: ${SOC_DB_PASSWORD:?Configure SOC_DB_PASSWORD no .env}
+
+    ports:
+      - "127.0.0.1:15432:5432"
+
+    volumes:
+      - soc_postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/001_schema.sql:ro
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U soc_lab -d soc_intelligence
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+volumes:
+  soc_postgres_data:

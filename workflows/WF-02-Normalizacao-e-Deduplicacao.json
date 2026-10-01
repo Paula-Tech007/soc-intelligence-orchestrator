@@ -1,0 +1,100 @@
+{
+  "name": "WF-02 - Normalizacao e Deduplicacao - SOC LAB",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "wf02-manual-trigger",
+      "name": "00 - Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const agora = new Date().toISOString();\n\nconst evidenciaOriginal = {\n  evidence_id: \"LAB-EV-001\",\n  type: \"network_connection\",\n  description: \"Conexao suspeita identificada no laboratorio.\",\n  src_ip: \"192.0.2.10\",\n  dst_ip: \"198.51.100.20\",\n  dst_port: 443\n};\n\nconst evidenciaNova = {\n  evidence_id: \"LAB-EV-002\",\n  type: \"host_observation\",\n  description: \"Novo hostname associado ao evento original.\",\n  hostname: \"lab-workstation-02\"\n};\n\nconst base = {\n  schema_version: \"1.0\",\n  environment: \"LAB\",\n  source: \"SOC-LAB\",\n  source_event_id: \"LAB-0001\",\n  occurred_at: \"2026-10-01T12:00:00Z\",\n  event_type: \"suspicious_connection\"\n};\n\nconst casos = [\n  {\n    sample_case: \"NEW_EVENT\",\n    severity: \"medium\",\n    entity: {\n      hostname: \"lab-workstation-01\",\n      src_ip: \"192.0.2.10\",\n      dst_ip: \"198.51.100.20\"\n    },\n    evidence: [evidenciaOriginal]\n  },\n  {\n    sample_case: \"EXACT_REPEAT\",\n    severity: \"medium\",\n    entity: {\n      hostname: \"lab-workstation-01\",\n      src_ip: \"192.0.2.10\",\n      dst_ip: \"198.51.100.20\"\n    },\n    evidence: [evidenciaOriginal]\n  },\n  {\n    sample_case: \"MATERIAL_UPDATE\",\n    severity: \"high\",\n    entity: {\n      hostname: \"lab-workstation-01\",\n      src_ip: \"192.0.2.10\",\n      dst_ip: \"198.51.100.20\",\n      related_hostnames: [\"lab-workstation-02\"]\n    },\n    evidence: [\n      evidenciaOriginal,\n      evidenciaNova\n    ]\n  }\n];\n\nreturn casos.map((caso, indice) => ({\n  json: {\n    ...base,\n    ...caso,\n    collection_sequence: indice + 1,\n    collected_at: agora,\n    ingested_at: agora,\n    validation: {\n      status: \"VALID\",\n      errors: []\n    },\n    collector: \"WF-01\",\n    test_mode: true\n  }\n}));"
+      },
+      "id": "wf02-test-input",
+      "name": "01 - Preparar Eventos de Teste",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const entradas = $input.all();\n\nconst historico = new Map();\n\nfunction canonicalizar(valor) {\n  if (Array.isArray(valor)) {\n    return valor.map(canonicalizar);\n  }\n\n  if (valor && typeof valor === \"object\") {\n    return Object.fromEntries(\n      Object.keys(valor)\n        .sort()\n        .map(chave => [\n          chave,\n          canonicalizar(valor[chave])\n        ])\n    );\n  }\n\n  return valor;\n}\n\nfunction assinatura(valor) {\n  return JSON.stringify(canonicalizar(valor));\n}\n\nfunction listaUnica(valores) {\n  return [...new Set(valores)].sort();\n}\n\nconst resultados = [];\n\nfor (const entrada of entradas) {\n\n  const evento = entrada.json;\n\n  if (\n    evento.environment !== \"LAB\" ||\n    evento.validation?.status !== \"VALID\"\n  ) {\n    throw new Error(\n      \"Evento invalido ou fora do ambiente LAB.\"\n    );\n  }\n\n  const obrigatorios = [\n    \"source\",\n    \"source_event_id\",\n    \"occurred_at\",\n    \"event_type\",\n    \"severity\"\n  ];\n\n  for (const campo of obrigatorios) {\n    if (!evento[campo]) {\n      throw new Error(\n        `Campo obrigatorio ausente: ${campo}`\n      );\n    }\n  }\n\n  if (\n    !Array.isArray(evento.evidence) ||\n    evento.evidence.length === 0\n  ) {\n    throw new Error(\"Evento sem evidencias.\");\n  }\n\n  const ids = evento.evidence.map(\n    evidencia => evidencia.evidence_id\n  );\n\n  if (\n    ids.some(id => !id) ||\n    new Set(ids).size !== ids.length\n  ) {\n    throw new Error(\n      \"Identificadores de evidencias invalidos.\"\n    );\n  }\n\n  const identityKey = assinatura([\n    evento.source,\n    evento.source_event_id,\n    evento.event_type\n  ]);\n\n  const entidade = canonicalizar(evento.entity ?? {});\n\n  const evidencias = [...evento.evidence]\n    .map(canonicalizar)\n    .sort((a, b) =>\n      a.evidence_id.localeCompare(b.evidence_id)\n    );\n\n  const normalized = {\n    source: evento.source,\n    source_event_id: evento.source_event_id,\n    occurred_at: evento.occurred_at,\n    event_type: evento.event_type,\n    severity: evento.severity,\n    entity: entidade,\n    evidence: evidencias\n  };\n\n  // Campos de transporte, horario da coleta e sample_case\n  // nao fazem parte da assinatura de deduplicacao.\n\n  const contentSignature = assinatura(normalized);\n\n  const anterior = historico.get(identityKey);\n\n  let status;\n  let shouldAnalyze;\n  let changedFields = [];\n  let newEvidenceIds = [];\n\n  if (!anterior) {\n\n    status = \"NEW_EVENT\";\n    shouldAnalyze = true;\n\n    historico.set(identityKey, {\n      occurrenceCount: 1,\n      version: 1,\n      latest: normalized,\n      latestSignature: contentSignature,\n      knownSignatures: new Set([contentSignature])\n    });\n\n  } else {\n\n    anterior.occurrenceCount += 1;\n\n    if (\n      anterior.knownSignatures.has(contentSignature)\n    ) {\n\n      status = \"EXACT_REPEAT\";\n      shouldAnalyze = false;\n\n    } else {\n\n      status = \"MATERIAL_UPDATE\";\n      shouldAnalyze = true;\n\n      const antigo = anterior.latest;\n\n      if (antigo.severity !== normalized.severity) {\n        changedFields.push(\"severity\");\n      }\n\n      if (\n        assinatura(antigo.entity) !==\n        assinatura(normalized.entity)\n      ) {\n        changedFields.push(\"entity\");\n      }\n\n      const antigosIds = new Set(\n        antigo.evidence.map(e => e.evidence_id)\n      );\n\n      newEvidenceIds = normalized.evidence\n        .map(e => e.evidence_id)\n        .filter(id => !antigosIds.has(id));\n\n      if (\n        assinatura(antigo.evidence) !==\n        assinatura(normalized.evidence)\n      ) {\n        changedFields.push(\"evidence\");\n      }\n\n      if (\n        antigo.occurred_at !== normalized.occurred_at\n      ) {\n        changedFields.push(\"occurred_at\");\n      }\n\n      anterior.version += 1;\n      anterior.latest = normalized;\n      anterior.latestSignature = contentSignature;\n      anterior.knownSignatures.add(contentSignature);\n\n    }\n  }\n\n  const atual = historico.get(identityKey);\n\n  resultados.push({\n    json: {\n      schema_version: \"1.0\",\n      environment: \"LAB\",\n      processor: \"WF-02\",\n\n      collection_sequence:\n        evento.collection_sequence,\n\n      sample_case: evento.sample_case,\n\n      identity_key: identityKey,\n\n      content_signature: contentSignature,\n\n      normalized_event: normalized,\n\n      deduplication: {\n        status,\n        occurrence_count: atual.occurrenceCount,\n        investigation_version: atual.version,\n        changed_fields: listaUnica(changedFields),\n        new_evidence_ids: listaUnica(newEvidenceIds)\n      },\n\n      decision: {\n        should_analyze: shouldAnalyze,\n        target_workflow: shouldAnalyze\n          ? \"WF-03\"\n          : null,\n        reason:\n          status === \"NEW_EVENT\"\n            ? \"Primeira ocorrencia.\"\n            : status === \"EXACT_REPEAT\"\n              ? \"Conteudo previamente observado.\"\n              : \"Novas informacoes relevantes.\"\n      },\n\n      dispatch_status: \"MOCK_ONLY\",\n      real_execution_started: false,\n      processed_at: new Date().toISOString()\n    }\n  });\n\n}\n\nreturn resultados;"
+      },
+      "id": "wf02-dedup",
+      "name": "02 - Normalizar e Deduplicar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const registros = $input.all();\n\nconst permitidos = new Set([\n  \"NEW_EVENT\",\n  \"EXACT_REPEAT\",\n  \"MATERIAL_UPDATE\"\n]);\n\nreturn registros.map(item => {\n\n  const registro = item.json;\n\n  const status = registro.deduplication?.status;\n\n  if (!permitidos.has(status)) {\n    throw new Error(\n      \"Classificacao de deduplicacao invalida.\"\n    );\n  }\n\n  if (\n    status === \"EXACT_REPEAT\" &&\n    registro.decision.should_analyze !== false\n  ) {\n    throw new Error(\n      \"Repeticao nao pode solicitar nova analise.\"\n    );\n  }\n\n  if (\n    status !== \"EXACT_REPEAT\" &&\n    registro.decision.should_analyze !== true\n  ) {\n    throw new Error(\n      \"Evento novo ou atualizado deveria ser elegivel.\"\n    );\n  }\n\n  return {\n    json: {\n      ...registro,\n      audit: {\n        status: \"VALIDATED\",\n        persistence: \"NOT_ENABLED\",\n        notification_sent: false,\n        ai_executed: false,\n        checked_at: new Date().toISOString()\n      }\n    }\n  };\n\n});"
+      },
+      "id": "wf02-audit",
+      "name": "03 - Validar Decisoes e Auditoria",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "00 - Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "01 - Preparar Eventos de Teste",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "01 - Preparar Eventos de Teste": {
+      "main": [
+        [
+          {
+            "node": "02 - Normalizar e Deduplicar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 - Normalizar e Deduplicar": {
+      "main": [
+        [
+          {
+            "node": "03 - Validar Decisoes e Auditoria",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Sao_Paulo"
+  },
+  "active": false,
+  "pinData": {},
+  "tags": []
+}

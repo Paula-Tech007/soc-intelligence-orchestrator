@@ -1,0 +1,100 @@
+{
+  "name": "WF-03 - Contexto e Correlacao - SOC LAB",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "wf03-trigger",
+      "name": "00 - Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const snapshot = [{\"schema_version\": \"1.0\", \"environment\": \"LAB\", \"processor\": \"WF-03\", \"queue_id\": 12, \"queue_status\": \"PENDING\", \"investigation_id\": \"8eb57aa6-8249-4b48-bfe9-c00bb0d324d9\", \"source_event_id\": \"LAB-0001\", \"requested_version\": 1, \"current_version\": 2, \"is_historical_version\": true, \"eligible_for_context_review\": false, \"context_status\": \"HISTORICAL_VERSION\", \"event\": {\"entity\": {\"dst_ip\": \"198.51.100.20\", \"src_ip\": \"192.0.2.10\", \"hostname\": \"lab-workstation-01\"}, \"source\": \"SOC-LAB\", \"evidence\": [{\"type\": \"network_connection\", \"dst_ip\": \"198.51.100.20\", \"src_ip\": \"192.0.2.10\", \"dst_port\": 443, \"description\": \"Conexao suspeita identificada no laboratorio.\", \"evidence_id\": \"LAB-EV-001\"}], \"severity\": \"medium\", \"event_type\": \"suspicious_connection\", \"occurred_at\": \"2026-10-01T12:00:00Z\", \"source_event_id\": \"LAB-0001\"}, \"indicators\": {\"ips\": [\"192.0.2.10\", \"198.51.100.20\"], \"hostnames\": [\"lab-workstation-01\"]}, \"evidence_count\": 1, \"changed_fields\": [], \"occurrence_count\": 3, \"correlations\": {\"type\": \"INFORMATIONAL\", \"scope\": \"SOC-LAB\", \"candidates_limit\": 100, \"matches\": [{\"source_event_id\": \"LAB-BRIDGE-EVENT-0359fac7f830\", \"common_ips\": [\"192.0.2.10\", \"198.51.100.20\"], \"common_hostnames\": [\"lab-workstation-01\"], \"relation_type\": \"SHARED_INDICATORS\"}, {\"source_event_id\": \"LAB-INT-23b55f4ce506\", \"common_ips\": [\"192.0.2.10\", \"198.51.100.20\"], \"common_hostnames\": [\"lab-workstation-01\"], \"relation_type\": \"SHARED_INDICATORS\"}, {\"source_event_id\": \"LAB-INT-3f413847df95\", \"common_ips\": [\"192.0.2.10\", \"198.51.100.20\"], \"common_hostnames\": [\"lab-workstation-01\"], \"relation_type\": \"SHARED_INDICATORS\"}, {\"source_event_id\": \"LAB-PERSIST-2d036f3d5251\", \"common_ips\": [\"192.0.2.10\", \"198.51.100.20\"], \"common_hostnames\": [\"lab-workstation-01\"], \"relation_type\": \"SHARED_INDICATORS\"}, {\"source_event_id\": \"LAB-PERSIST-5a719b50fff3\", \"common_ips\": [\"192.0.2.10\", \"198.51.100.20\"], \"common_hostnames\": [\"lab-workstation-01\"], \"relation_type\": \"SHARED_INDICATORS\"}, {\"source_event_id\": \"LAB-REPLAY-EVENT-2ca40f8547df\", \"common_ips\": [\"192.0.2.10\"], \"common_hostnames\": [], \"relation_type\": \"SHARED_INDICATORS\"}]}, \"provenance\": {\"database\": \"soc_intelligence\", \"table\": \"investigation_versions\", \"version\": 1, \"content_signature\": \"bc6877a0a006c7371cfe64b6d1da0629eb291ca848aab2487421539992259d6f\"}, \"dispatch_status\": \"MOCK_ONLY\", \"ai_executed\": false, \"notification_sent\": false}, {\"schema_version\": \"1.0\", \"environment\": \"LAB\", \"processor\": \"WF-03\", \"queue_id\": 13, \"queue_status\": \"PENDING\", \"investigation_id\": \"8eb57aa6-8249-4b48-bfe9-c00bb0d324d9\", \"source_event_id\": \"LAB-0001\", \"requested_version\": 2, \"current_version\": 2, \"is_historical_version\": false, \"eligible_for_context_review\": true, \"context_status\": \"READY_FOR_REVIEW\", \"event\": {\"entity\": {\"dst_ip\": \"198.51.100.20\", \"src_ip\": \"192.0.2.10\", \"hostname\": \"lab-workstation-01\", \"related_hostnames\": [\"lab-workstation-02\"]}, \"source\": \"SOC-LAB\", \"evidence\": [{\"type\": \"network_connection\", \"dst_ip\": \"198.51.100.20\", \"src_ip\": \"192.0.2.10\", \"dst_port\": 443, \"description\": \"Conexao suspeita identificada no laboratorio.\", \"evidence_id\": \"LAB-EV-001\"}, {\"type\": \"host_observation\", \"hostname\": \"lab-workstation-02\", \"description\": \"Novo hostname associado ao evento original.\", \"evidence_id\": \"LAB-EV-002\"}], \"severity\": \"high\", \"event_type\": \"suspicious_connection\", \"occurred_at\": \"2026-10-01T12:00:00Z\", \"source_event_id\": \"LAB-0001\"}, \"indicators\": {\"ips\": [\"192.0.2.10\", \"198.51.100.20\"], \"hostnames\": [\"lab-workstation-01\", \"lab-workstation-02\"]}, \"evidence_count\": 2, \"changed_fields\": [\"entity\", \"evidence\", \"severity\"], \"occurrence_count\": 3, \"correlations\": {\"type\": \"INFORMATIONAL\", \"scope\": \"SOC-LAB\", \"candidates_limit\": 100, \"matches\": [{\"source_event_id\": \"LAB-BRIDGE-EVENT-0359fac7f830\", \"common_ips\": [\"192.0.2.10\", \"198.51.100.20\"], \"common_hostnames\": [\"lab-workstation-01\", \"lab-workstation-02\"], \"relation_type\": \"SHARED_INDICATORS\"}, {\"source_event_id\": \"LAB-INT-23b55f4ce506\", \"common_ips\": [\"192.0.2.10\", \"198.51.100.20\"], \"common_hostnames\": [\"lab-workstation-01\", \"lab-workstation-02\"], \"relation_type\": \"SHARED_INDICATORS\"}, {\"source_event_id\": \"LAB-INT-3f413847df95\", \"common_ips\": [\"192.0.2.10\", \"198.51.100.20\"], \"common_hostnames\": [\"lab-workstation-01\", \"lab-workstation-02\"], \"relation_type\": \"SHARED_INDICATORS\"}, {\"source_event_id\": \"LAB-PERSIST-2d036f3d5251\", \"common_ips\": [\"192.0.2.10\", \"198.51.100.20\"], \"common_hostnames\": [\"lab-workstation-01\", \"lab-workstation-02\"], \"relation_type\": \"SHARED_INDICATORS\"}, {\"source_event_id\": \"LAB-PERSIST-5a719b50fff3\", \"common_ips\": [\"192.0.2.10\", \"198.51.100.20\"], \"common_hostnames\": [\"lab-workstation-01\", \"lab-workstation-02\"], \"relation_type\": \"SHARED_INDICATORS\"}, {\"source_event_id\": \"LAB-REPLAY-EVENT-2ca40f8547df\", \"common_ips\": [\"192.0.2.10\"], \"common_hostnames\": [], \"relation_type\": \"SHARED_INDICATORS\"}]}, \"provenance\": {\"database\": \"soc_intelligence\", \"table\": \"investigation_versions\", \"version\": 2, \"content_signature\": \"30a180b436306e413da458a3d2d307a864e3a812cc0460dc689c1ee97dbf7978\"}, \"dispatch_status\": \"MOCK_ONLY\", \"ai_executed\": false, \"notification_sent\": false}];\n\nif (!Array.isArray(snapshot) || snapshot.length !== 2) {\n  throw new Error(\"Snapshot LAB invalido.\");\n}\n\nreturn snapshot.map((contexto) => ({\n  json: {\n    ...contexto,\n    snapshot_mode: true,\n    snapshot_origin: \"LOCAL_POSTGRESQL_EXPORT\",\n    runtime_database_query: false\n  }\n}));"
+      },
+      "id": "wf03-snapshot",
+      "name": "01 - Carregar Snapshot LAB",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const registros = $input.all();\n\nreturn registros.map((item) => {\n\n  const contexto = item.json;\n\n  if (\n    contexto.environment !== \"LAB\" ||\n    contexto.processor !== \"WF-03\"\n  ) {\n    throw new Error(\"Contexto fora do escopo LAB.\");\n  }\n\n  if (\n    contexto.schema_version !== \"1.0\" ||\n    !contexto.investigation_id ||\n    !contexto.queue_id\n  ) {\n    throw new Error(\"Contrato de contexto invalido.\");\n  }\n\n  const versaoHistorica =\n    contexto.requested_version <\n    contexto.current_version;\n\n  if (\n    contexto.is_historical_version !== versaoHistorica\n  ) {\n    throw new Error(\n      \"Inconsistencia no versionamento.\"\n    );\n  }\n\n  const elegivel =\n    contexto.queue_status === \"PENDING\" &&\n    !versaoHistorica;\n\n  if (\n    contexto.eligible_for_context_review !== elegivel\n  ) {\n    throw new Error(\n      \"Inconsistencia na elegibilidade.\"\n    );\n  }\n\n  if (\n    !Array.isArray(contexto.event?.evidence) ||\n    contexto.event.evidence.length !==\n      contexto.evidence_count\n  ) {\n    throw new Error(\n      \"Quantidade de evidencias inconsistente.\"\n    );\n  }\n\n  const statusEsperado = versaoHistorica\n    ? \"HISTORICAL_VERSION\"\n    : elegivel\n      ? \"READY_FOR_REVIEW\"\n      : \"NOT_PENDING\";\n\n  if (contexto.context_status !== statusEsperado) {\n    throw new Error(\n      \"Status do contexto inconsistente.\"\n    );\n  }\n\n  // Validar a integridade do contexto para o WF-04.\n\n  if (\n    !contexto.event ||\n    typeof contexto.event !== \"object\" ||\n    !contexto.event.source_event_id ||\n    !contexto.event.event_type ||\n    !contexto.event.severity ||\n    !contexto.event.occurred_at\n  ) {\n    throw new Error(\n      \"Evento normalizado incompleto.\"\n    );\n  }\n\n  if (\n    contexto.event.source_event_id !==\n    contexto.source_event_id\n  ) {\n    throw new Error(\n      \"Identidade divergente entre contexto e evento.\"\n    );\n  }\n\n  if (\n    !Array.isArray(contexto.changed_fields) ||\n    !contexto.provenance?.content_signature\n  ) {\n    throw new Error(\n      \"Metadados de versao e proveniencia ausentes.\"\n    );\n  }\n\n\n  if (\n    contexto.ai_executed !== false ||\n    contexto.dispatch_status !== \"MOCK_ONLY\"\n  ) {\n    throw new Error(\n      \"Execucao nao autorizada detectada.\"\n    );\n  }\n\n  return {\n    json: {\n      ...contexto,\n      validation: {\n        status: \"VALID\",\n        checked_at: new Date().toISOString(),\n        calculated_eligibility: elegivel\n      }\n    }\n  };\n\n});"
+      },
+      "id": "wf03-validation",
+      "name": "02 - Validar Contexto e Versao",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const registros = $input.all();\n\nreturn registros.map((item) => {\n\n  const contexto = item.json;\n\n  if (contexto.validation?.status !== \"VALID\") {\n    throw new Error(\n      \"Contexto nao validado.\"\n    );\n  }\n\n  const elegivel =\n    contexto.validation.calculated_eligibility;\n\n  return {\n    json: {\n      schema_version: \"1.0\",\n      environment: \"LAB\",\n      processor: \"WF-03\",\n\n      queue_id: contexto.queue_id,\n\n      investigation_id:\n        contexto.investigation_id,\n\n      source_event_id:\n        contexto.source_event_id,\n\n      requested_version:\n        contexto.requested_version,\n\n      current_version:\n        contexto.current_version,\n\n      context_status:\n        contexto.context_status,\n\n      is_historical_version:\n        contexto.is_historical_version,\n\n      // Contexto integral para fundamentar a futura IA.\n      // Dados provenientes do snapshot LAB validado.\n\n      event:\n        contexto.event,\n\n      changed_fields:\n        contexto.changed_fields,\n\n      severity:\n        contexto.event.severity,\n\n      evidence_count:\n        contexto.evidence_count,\n\n      indicators:\n        contexto.indicators,\n\n      correlations:\n        contexto.correlations,\n\n      provenance:\n        contexto.provenance,\n\n      decision: {\n        eligible_for_ai: elegivel,\n        target_workflow: elegivel\n          ? \"WF-04\"\n          : null,\n\n        reason: elegivel\n          ? \"Versao atual validada para revisao.\"\n          : contexto.is_historical_version\n            ? \"Versao historica. Nao solicitar nova analise.\"\n            : \"Tarefa nao elegivel.\"\n      },\n\n      validation_status: \"VALID\",\n\n      snapshot_mode: true,\n\n      runtime_database_query: false,\n\n      dispatch_status: \"MOCK_ONLY\",\n\n      real_execution_started: false,\n\n      ai_executed: false,\n\n      notification_sent: false\n    }\n  };\n\n});"
+      },
+      "id": "wf03-result",
+      "name": "03 - Preparar Resultado WF-04",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "00 - Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "01 - Carregar Snapshot LAB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "01 - Carregar Snapshot LAB": {
+      "main": [
+        [
+          {
+            "node": "02 - Validar Contexto e Versao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 - Validar Contexto e Versao": {
+      "main": [
+        [
+          {
+            "node": "03 - Preparar Resultado WF-04",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Sao_Paulo"
+  },
+  "active": false,
+  "pinData": {},
+  "tags": []
+}

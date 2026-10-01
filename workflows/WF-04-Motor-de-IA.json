@@ -1,0 +1,99 @@
+{
+  "name": "SOC LAB - WF-04 - Motor de IA - Contrato MOCK",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "3beb501d-1e5e-459c-8055-ec613c5a1b47",
+      "name": "01 - Iniciar WF-04 Manualmente",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "\nconst fixture = {\"schema_version\": \"1.0\", \"environment\": \"LAB\", \"origin\": \"WF-04\", \"fixture_type\": \"MOCK_AI_RESPONSE\", \"real_ollama_call\": false, \"ready_for_operational_dispatch\": false, \"results\": [{\"schema_version\": \"1.0\", \"environment\": \"LAB\", \"processor\": \"WF-04\", \"queue_id\": 12, \"investigation_id\": \"8eb57aa6-8249-4b48-bfe9-c00bb0d324d9\", \"source_event_id\": \"LAB-0001\", \"investigation_version\": 1, \"provenance\": {\"database\": \"soc_intelligence\", \"table\": \"investigation_versions\", \"version\": 1, \"content_signature\": \"bc6877a0a006c7371cfe64b6d1da0629eb291ca848aab2487421539992259d6f\"}, \"dispatch_status\": \"MOCK_ONLY\", \"real_execution_started\": false, \"notification_sent\": false, \"status\": \"SKIPPED\", \"reason\": \"Contexto nao elegivel para IA.\", \"ai_executed\": false, \"requires_human_review\": false, \"analysis\": null}, {\"schema_version\": \"1.0\", \"environment\": \"LAB\", \"processor\": \"WF-04\", \"queue_id\": 13, \"investigation_id\": \"8eb57aa6-8249-4b48-bfe9-c00bb0d324d9\", \"source_event_id\": \"LAB-0001\", \"investigation_version\": 2, \"provenance\": {\"database\": \"soc_intelligence\", \"table\": \"investigation_versions\", \"version\": 2, \"content_signature\": \"30a180b436306e413da458a3d2d307a864e3a812cc0460dc689c1ee97dbf7978\"}, \"dispatch_status\": \"MOCK_ONLY\", \"real_execution_started\": false, \"notification_sent\": false, \"status\": \"ANALYSIS_COMPLETED\", \"model\": \"qwen3:4b-instruct\", \"ai_executed\": true, \"requires_human_review\": true, \"analysis\": {\"summary\": \"Evento sintetico LAB-0001 encaminhado para revisao humana.\", \"assessment\": \"Existem duas evidencias registradas. As correlacoes sao informativas e nao comprovam um mesmo incidente.\", \"evidence_ids\": [\"LAB-EV-001\", \"LAB-EV-002\"], \"limitations\": [\"Dados exclusivamente sinteticos.\", \"Sem comprovacao de atividade maliciosa.\"], \"review_actions\": [\"Revisar as evidencias do evento.\"]}, \"note\": \"Resultado assistivo; nao constitui decisao operacional automatica.\"}]};\n\nif (\n  fixture.environment !== 'LAB' ||\n  fixture.fixture_type !== 'MOCK_AI_RESPONSE' ||\n  fixture.real_ollama_call !== false ||\n  fixture.ready_for_operational_dispatch !== false\n) {\n  throw new Error('Fixture WF-04 nao autorizado.');\n}\n\nreturn fixture.results.map(result => ({\n  json: {\n    ...result,\n    fixture_type: fixture.fixture_type,\n    real_ollama_call: false,\n    ready_for_operational_dispatch: false\n  }\n}));\n"
+      },
+      "id": "60f73e09-2a22-41b7-940a-477ae469676b",
+      "name": "02 - Carregar Resultado MOCK",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "\nconst input = $input.all();\n\nif (input.length !== 2) {\n  throw new Error('Esperados dois resultados WF-04.');\n}\n\nconst seen = new Set();\n\nfor (const item of input) {\n\n  const r = item.json;\n\n  if (\n    r.schema_version !== '1.0' ||\n    r.environment !== 'LAB' ||\n    r.processor !== 'WF-04' ||\n    r.fixture_type !== 'MOCK_AI_RESPONSE' ||\n    r.dispatch_status !== 'MOCK_ONLY' ||\n    r.real_ollama_call !== false ||\n    r.real_execution_started !== false ||\n    r.notification_sent !== false ||\n    r.ready_for_operational_dispatch !== false\n  ) {\n    throw new Error('Contrato ou ambiente invalido.');\n  }\n\n  if (\n    !Number.isInteger(r.queue_id) ||\n    !r.investigation_id ||\n    r.source_event_id !== 'LAB-0001' ||\n    !Number.isInteger(r.investigation_version)\n  ) {\n    throw new Error('Identidade da investigacao invalida.');\n  }\n\n  if (\n    !r.provenance ||\n    r.provenance.version !== r.investigation_version ||\n    !/^[a-f0-9]{64}$/.test(\n      r.provenance.content_signature || ''\n    )\n  ) {\n    throw new Error('Proveniencia invalida.');\n  }\n\n  if (seen.has(r.queue_id)) {\n    throw new Error('Queue ID duplicado.');\n  }\n\n  seen.add(r.queue_id);\n\n  if (r.investigation_version === 1) {\n\n    if (\n      r.queue_id !== 12 ||\n      r.status !== 'SKIPPED' ||\n      r.ai_executed !== false ||\n      r.requires_human_review !== false ||\n      r.analysis !== null\n    ) {\n      throw new Error('Versao historica invalida.');\n    }\n\n  } else if (r.investigation_version === 2) {\n\n    if (\n      r.queue_id !== 13 ||\n      r.status !== 'ANALYSIS_COMPLETED' ||\n      r.ai_executed !== true ||\n      r.requires_human_review !== true ||\n      !r.analysis\n    ) {\n      throw new Error('Resultado atual invalido.');\n    }\n\n    const a = r.analysis;\n\n    for (const key of ['summary', 'assessment']) {\n      if (\n        typeof a[key] !== 'string' ||\n        !a[key].trim()\n      ) {\n        throw new Error('Texto obrigatorio ausente: ' + key);\n      }\n    }\n\n    for (\n      const key of [\n        'evidence_ids',\n        'limitations',\n        'review_actions'\n      ]\n    ) {\n      if (\n        !Array.isArray(a[key]) ||\n        !a[key].every(v => typeof v === 'string')\n      ) {\n        throw new Error('Lista de analise invalida: ' + key);\n      }\n    }\n\n    const ids = [...new Set(a.evidence_ids)];\n\n    if (\n      ids.length !== 2 ||\n      !ids.includes('LAB-EV-001') ||\n      !ids.includes('LAB-EV-002')\n    ) {\n      throw new Error('Evidencias inesperadas.');\n    }\n\n  } else {\n\n    throw new Error('Versao inesperada neste fixture LAB.');\n\n  }\n\n  r.contract_validation = 'VALID';\n}\n\nreturn input;\n"
+      },
+      "id": "e68caec5-28f7-438b-8536-5146d190d59d",
+      "name": "03 - Validar Contrato WF-04",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        740,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "\nreturn $input.all().map(item => {\n\n  const r = item.json;\n\n  if (r.contract_validation !== 'VALID') {\n    throw new Error('Contrato nao validado.');\n  }\n\n  const eligible = (\n    r.investigation_version === 2 &&\n    r.status === 'ANALYSIS_COMPLETED' &&\n    r.requires_human_review === true\n  );\n\n  return {\n    json: {\n      ...r,\n\n      decision: {\n        eligible_for_report: eligible,\n        target_workflow: eligible ? 'WF-05' : null,\n        reason: eligible\n          ? 'Analise MOCK validada para teste do relatorio.'\n          : 'Versao historica ignorada.'\n      },\n\n      integration_mode: 'MOCK_SNAPSHOT',\n\n      ready_for_operational_dispatch: false,\n      real_ollama_call: false,\n      notification_sent: false\n    }\n  };\n});\n"
+      },
+      "id": "fb5e960a-418e-4be7-8bad-3cbd6b7d432a",
+      "name": "04 - Preparar Contrato WF-05",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1000,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "01 - Iniciar WF-04 Manualmente": {
+      "main": [
+        [
+          {
+            "node": "02 - Carregar Resultado MOCK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 - Carregar Resultado MOCK": {
+      "main": [
+        [
+          {
+            "node": "03 - Validar Contrato WF-04",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "03 - Validar Contrato WF-04": {
+      "main": [
+        [
+          {
+            "node": "04 - Preparar Contrato WF-05",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false,
+  "pinData": {},
+  "tags": []
+}

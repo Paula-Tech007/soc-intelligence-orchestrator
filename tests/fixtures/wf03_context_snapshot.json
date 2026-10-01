@@ -1,0 +1,275 @@
+[
+  {
+    "schema_version": "1.0",
+    "environment": "LAB",
+    "processor": "WF-03",
+    "queue_id": 12,
+    "queue_status": "PENDING",
+    "investigation_id": "8eb57aa6-8249-4b48-bfe9-c00bb0d324d9",
+    "source_event_id": "LAB-0001",
+    "requested_version": 1,
+    "current_version": 2,
+    "is_historical_version": true,
+    "eligible_for_context_review": false,
+    "context_status": "HISTORICAL_VERSION",
+    "event": {
+      "entity": {
+        "dst_ip": "198.51.100.20",
+        "src_ip": "192.0.2.10",
+        "hostname": "lab-workstation-01"
+      },
+      "source": "SOC-LAB",
+      "evidence": [
+        {
+          "type": "network_connection",
+          "dst_ip": "198.51.100.20",
+          "src_ip": "192.0.2.10",
+          "dst_port": 443,
+          "description": "Conexao suspeita identificada no laboratorio.",
+          "evidence_id": "LAB-EV-001"
+        }
+      ],
+      "severity": "medium",
+      "event_type": "suspicious_connection",
+      "occurred_at": "2026-10-01T12:00:00Z",
+      "source_event_id": "LAB-0001"
+    },
+    "indicators": {
+      "ips": [
+        "192.0.2.10",
+        "198.51.100.20"
+      ],
+      "hostnames": [
+        "lab-workstation-01"
+      ]
+    },
+    "evidence_count": 1,
+    "changed_fields": [],
+    "occurrence_count": 3,
+    "correlations": {
+      "type": "INFORMATIONAL",
+      "scope": "SOC-LAB",
+      "candidates_limit": 100,
+      "matches": [
+        {
+          "source_event_id": "LAB-BRIDGE-EVENT-0359fac7f830",
+          "common_ips": [
+            "192.0.2.10",
+            "198.51.100.20"
+          ],
+          "common_hostnames": [
+            "lab-workstation-01"
+          ],
+          "relation_type": "SHARED_INDICATORS"
+        },
+        {
+          "source_event_id": "LAB-INT-23b55f4ce506",
+          "common_ips": [
+            "192.0.2.10",
+            "198.51.100.20"
+          ],
+          "common_hostnames": [
+            "lab-workstation-01"
+          ],
+          "relation_type": "SHARED_INDICATORS"
+        },
+        {
+          "source_event_id": "LAB-INT-3f413847df95",
+          "common_ips": [
+            "192.0.2.10",
+            "198.51.100.20"
+          ],
+          "common_hostnames": [
+            "lab-workstation-01"
+          ],
+          "relation_type": "SHARED_INDICATORS"
+        },
+        {
+          "source_event_id": "LAB-PERSIST-2d036f3d5251",
+          "common_ips": [
+            "192.0.2.10",
+            "198.51.100.20"
+          ],
+          "common_hostnames": [
+            "lab-workstation-01"
+          ],
+          "relation_type": "SHARED_INDICATORS"
+        },
+        {
+          "source_event_id": "LAB-PERSIST-5a719b50fff3",
+          "common_ips": [
+            "192.0.2.10",
+            "198.51.100.20"
+          ],
+          "common_hostnames": [
+            "lab-workstation-01"
+          ],
+          "relation_type": "SHARED_INDICATORS"
+        },
+        {
+          "source_event_id": "LAB-REPLAY-EVENT-2ca40f8547df",
+          "common_ips": [
+            "192.0.2.10"
+          ],
+          "common_hostnames": [],
+          "relation_type": "SHARED_INDICATORS"
+        }
+      ]
+    },
+    "provenance": {
+      "database": "soc_intelligence",
+      "table": "investigation_versions",
+      "version": 1,
+      "content_signature": "bc6877a0a006c7371cfe64b6d1da0629eb291ca848aab2487421539992259d6f"
+    },
+    "dispatch_status": "MOCK_ONLY",
+    "ai_executed": false,
+    "notification_sent": false
+  },
+  {
+    "schema_version": "1.0",
+    "environment": "LAB",
+    "processor": "WF-03",
+    "queue_id": 13,
+    "queue_status": "PENDING",
+    "investigation_id": "8eb57aa6-8249-4b48-bfe9-c00bb0d324d9",
+    "source_event_id": "LAB-0001",
+    "requested_version": 2,
+    "current_version": 2,
+    "is_historical_version": false,
+    "eligible_for_context_review": true,
+    "context_status": "READY_FOR_REVIEW",
+    "event": {
+      "entity": {
+        "dst_ip": "198.51.100.20",
+        "src_ip": "192.0.2.10",
+        "hostname": "lab-workstation-01",
+        "related_hostnames": [
+          "lab-workstation-02"
+        ]
+      },
+      "source": "SOC-LAB",
+      "evidence": [
+        {
+          "type": "network_connection",
+          "dst_ip": "198.51.100.20",
+          "src_ip": "192.0.2.10",
+          "dst_port": 443,
+          "description": "Conexao suspeita identificada no laboratorio.",
+          "evidence_id": "LAB-EV-001"
+        },
+        {
+          "type": "host_observation",
+          "hostname": "lab-workstation-02",
+          "description": "Novo hostname associado ao evento original.",
+          "evidence_id": "LAB-EV-002"
+        }
+      ],
+      "severity": "high",
+      "event_type": "suspicious_connection",
+      "occurred_at": "2026-10-01T12:00:00Z",
+      "source_event_id": "LAB-0001"
+    },
+    "indicators": {
+      "ips": [
+        "192.0.2.10",
+        "198.51.100.20"
+      ],
+      "hostnames": [
+        "lab-workstation-01",
+        "lab-workstation-02"
+      ]
+    },
+    "evidence_count": 2,
+    "changed_fields": [
+      "entity",
+      "evidence",
+      "severity"
+    ],
+    "occurrence_count": 3,
+    "correlations": {
+      "type": "INFORMATIONAL",
+      "scope": "SOC-LAB",
+      "candidates_limit": 100,
+      "matches": [
+        {
+          "source_event_id": "LAB-BRIDGE-EVENT-0359fac7f830",
+          "common_ips": [
+            "192.0.2.10",
+            "198.51.100.20"
+          ],
+          "common_hostnames": [
+            "lab-workstation-01",
+            "lab-workstation-02"
+          ],
+          "relation_type": "SHARED_INDICATORS"
+        },
+        {
+          "source_event_id": "LAB-INT-23b55f4ce506",
+          "common_ips": [
+            "192.0.2.10",
+            "198.51.100.20"
+          ],
+          "common_hostnames": [
+            "lab-workstation-01",
+            "lab-workstation-02"
+          ],
+          "relation_type": "SHARED_INDICATORS"
+        },
+        {
+          "source_event_id": "LAB-INT-3f413847df95",
+          "common_ips": [
+            "192.0.2.10",
+            "198.51.100.20"
+          ],
+          "common_hostnames": [
+            "lab-workstation-01",
+            "lab-workstation-02"
+          ],
+          "relation_type": "SHARED_INDICATORS"
+        },
+        {
+          "source_event_id": "LAB-PERSIST-2d036f3d5251",
+          "common_ips": [
+            "192.0.2.10",
+            "198.51.100.20"
+          ],
+          "common_hostnames": [
+            "lab-workstation-01",
+            "lab-workstation-02"
+          ],
+          "relation_type": "SHARED_INDICATORS"
+        },
+        {
+          "source_event_id": "LAB-PERSIST-5a719b50fff3",
+          "common_ips": [
+            "192.0.2.10",
+            "198.51.100.20"
+          ],
+          "common_hostnames": [
+            "lab-workstation-01",
+            "lab-workstation-02"
+          ],
+          "relation_type": "SHARED_INDICATORS"
+        },
+        {
+          "source_event_id": "LAB-REPLAY-EVENT-2ca40f8547df",
+          "common_ips": [
+            "192.0.2.10"
+          ],
+          "common_hostnames": [],
+          "relation_type": "SHARED_INDICATORS"
+        }
+      ]
+    },
+    "provenance": {
+      "database": "soc_intelligence",
+      "table": "investigation_versions",
+      "version": 2,
+      "content_signature": "30a180b436306e413da458a3d2d307a864e3a812cc0460dc689c1ee97dbf7978"
+    },
+    "dispatch_status": "MOCK_ONLY",
+    "ai_executed": false,
+    "notification_sent": false
+  }
+]

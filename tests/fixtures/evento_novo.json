@@ -1,0 +1,11 @@
+﻿{
+  "event_id": "LAB-0001",
+  "source": "SOC-LAB",
+  "timestamp": "2026-10-01T12:00:00Z",
+  "event_type": "suspicious_connection",
+  "severity": "medium",
+  "src_ip": "192.0.2.10",
+  "dst_ip": "198.51.100.20",
+  "hostname": "lab-workstation-01",
+  "description": "Evento sintetico para teste de coleta e deduplicacao."
+}

@@ -1,0 +1,172 @@
+{
+  "name": "SOC LAB - Integracao WF-01 para WF-02",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "ab9f1ec8-5de7-4d01-a202-08208d142777",
+      "name": "00 - Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        260,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const coletadoEm = new Date().toISOString();\n\nconst collectionId = `LAB-COLLECTION-${Date.now()}`;\n\nconst evidenciaOriginal = {\n  evidence_id: \"LAB-EV-001\",\n  type: \"network_connection\",\n  description: \"Conexao suspeita identificada no laboratorio.\",\n  src_ip: \"192.0.2.10\",\n  dst_ip: \"198.51.100.20\",\n  dst_port: 443\n};\n\nconst novaEvidencia = {\n  evidence_id: \"LAB-EV-002\",\n  type: \"host_observation\",\n  description: \"Novo hostname associado ao evento original.\",\n  hostname: \"lab-workstation-02\"\n};\n\nconst eventos = [\n\n  // CENARIO 01 - EVENTO NOVO\n\n  {\n    sample_case: \"NEW_EVENT\",\n    source_event_id: \"LAB-0001\",\n    occurred_at: \"2026-10-01T12:00:00Z\",\n    event_type: \"suspicious_connection\",\n    severity: \"medium\",\n    entity: {\n      hostname: \"lab-workstation-01\",\n      src_ip: \"192.0.2.10\",\n      dst_ip: \"198.51.100.20\"\n    },\n    evidence: [\n      evidenciaOriginal\n    ]\n  },\n\n  // CENARIO 02 - REPETICAO SEM NOVA EVIDENCIA\n\n  {\n    sample_case: \"EXACT_REPEAT\",\n    source_event_id: \"LAB-0001\",\n    occurred_at: \"2026-10-01T12:00:00Z\",\n    event_type: \"suspicious_connection\",\n    severity: \"medium\",\n    entity: {\n      hostname: \"lab-workstation-01\",\n      src_ip: \"192.0.2.10\",\n      dst_ip: \"198.51.100.20\"\n    },\n    evidence: [\n      evidenciaOriginal\n    ]\n  },\n\n  // CENARIO 03 - EVENTO ORIGINAL ATUALIZADO\n\n  {\n    sample_case: \"MATERIAL_UPDATE\",\n    source_event_id: \"LAB-0001\",\n    occurred_at: \"2026-10-01T12:00:00Z\",\n    event_type: \"suspicious_connection\",\n    severity: \"high\",\n    entity: {\n      hostname: \"lab-workstation-01\",\n      src_ip: \"192.0.2.10\",\n      dst_ip: \"198.51.100.20\",\n      related_hostnames: [\n        \"lab-workstation-02\"\n      ]\n    },\n    evidence: [\n      evidenciaOriginal,\n      novaEvidencia\n    ]\n  }\n\n];\n\nreturn eventos.map((evento, indice) => ({\n  json: {\n\n    schema_version: \"1.0\",\n\n    environment: \"LAB\",\n\n    collection_id: collectionId,\n\n    collection_sequence: indice + 1,\n\n    source: \"SOC-LAB\",\n\n    collected_at: coletadoEm,\n\n    ingested_at: coletadoEm,\n\n    raw_event: evento\n\n  }\n}));"
+      },
+      "id": "031c8340-fef3-455a-8d31-41eb2ef4e779",
+      "name": "01 - Coletar Eventos Sinteticos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const items = $input.all();\n\nfunction timestampValido(value) {\n  return (\n    typeof value === \"string\" &&\n    !Number.isNaN(Date.parse(value)) &&\n    /^\\d{4}-\\d{2}-\\d{2}T/.test(value)\n  );\n}\n\nreturn items.map((item, indice) => {\n\n  const registro = item.json;\n\n  const evento = registro.raw_event;\n\n  const erros = [];\n\n  if (registro.schema_version !== \"1.0\") {\n    erros.push(\"Versao do contrato invalida.\");\n  }\n\n  if (registro.environment !== \"LAB\") {\n    erros.push(\"Somente eventos LAB sao permitidos.\");\n  }\n\n  if (registro.source !== \"SOC-LAB\") {\n    erros.push(\"Fonte nao autorizada para este teste.\");\n  }\n\n  if (!registro.collection_id) {\n    erros.push(\"collection_id obrigatorio.\");\n  }\n\n  if (!timestampValido(registro.collected_at)) {\n    erros.push(\"collected_at invalido.\");\n  }\n\n  if (!timestampValido(registro.ingested_at)) {\n    erros.push(\"ingested_at invalido.\");\n  }\n\n  if (!evento || typeof evento !== \"object\") {\n    erros.push(\"raw_event ausente.\");\n  } else {\n\n    if (!evento.source_event_id) {\n      erros.push(\"source_event_id obrigatorio.\");\n    }\n\n    if (!timestampValido(evento.occurred_at)) {\n      erros.push(\"occurred_at invalido.\");\n    }\n\n    if (!evento.event_type) {\n      erros.push(\"event_type obrigatorio.\");\n    }\n\n    if (\n      ![\"low\", \"medium\", \"high\", \"critical\"]\n        .includes(evento.severity)\n    ) {\n      erros.push(\"severity invalida.\");\n    }\n\n    if (!evento.entity?.hostname) {\n      erros.push(\"hostname obrigatorio.\");\n    }\n\n    if (\n      !Array.isArray(evento.evidence) ||\n      evento.evidence.length === 0\n    ) {\n      erros.push(\"Lista de evidencias vazia.\");\n    } else {\n\n      const ids = evento.evidence.map(\n        evidence => evidence.evidence_id\n      );\n\n      if (ids.some(id => !id)) {\n        erros.push(\"Evidencia sem identificador.\");\n      }\n\n      if (new Set(ids).size !== ids.length) {\n        erros.push(\"Evidencias duplicadas no mesmo registro.\");\n      }\n\n    }\n\n  }\n\n  if (erros.length > 0) {\n    throw new Error(\n      `Evento ${indice + 1}: ${erros.join(\" | \")}`\n    );\n  }\n\n  return {\n    json: {\n      ...registro,\n      validation: {\n        status: \"VALID\",\n        checked_at: new Date().toISOString(),\n        errors: []\n      }\n    }\n  };\n\n});"
+      },
+      "id": "5ab1baf5-e1c3-42f0-ab8f-891d816abe17",
+      "name": "02 - Validar Eventos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const registros = $input.all();\n\nreturn registros.map(item => {\n\n  const registro = item.json;\n\n  if (registro.validation?.status !== \"VALID\") {\n    throw new Error(\n      \"Evento sem validacao. Entrega bloqueada.\"\n    );\n  }\n\n  return {\n    json: {\n\n      ...registro,\n\n      collector: \"WF-01\",\n\n      target_workflow: \"WF-02\",\n\n      collection_status: \"COLLECTED_VALIDATED\",\n\n      dispatch_status: \"MOCK_ONLY\",\n\n      real_execution_started: false,\n\n      note:\n        \"Evento coletado e validado. \" +\n        \"Deduplicacao reservada para o WF-02.\"\n\n    }\n  };\n\n});"
+      },
+      "id": "8af9dc32-f9a9-44e7-aa48-5feaff52f1bd",
+      "name": "03 - Preparar Entrega ao WF-02",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        920,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const entradas = $input.all();\n\nif (entradas.length !== 3) {\n  throw new Error(\n    \"LAB: esperados exatamente tres eventos WF-01.\"\n  );\n}\n\nconst registros = entradas\n  .map(item => item.json)\n  .sort(\n    (a, b) =>\n      a.collection_sequence - b.collection_sequence\n  );\n\nconst casosEsperados = [\n  \"NEW_EVENT\",\n  \"EXACT_REPEAT\",\n  \"MATERIAL_UPDATE\"\n];\n\nreturn registros.map((registro, indice) => {\n\n  if (\n    registro.schema_version !== \"1.0\" ||\n    registro.environment !== \"LAB\" ||\n    registro.source !== \"SOC-LAB\" ||\n    registro.validation?.status !== \"VALID\" ||\n    registro.collection_status !== \"COLLECTED_VALIDATED\" ||\n    registro.dispatch_status !== \"MOCK_ONLY\" ||\n    registro.real_execution_started !== false ||\n    registro.target_workflow !== \"WF-02\"\n  ) {\n    throw new Error(\n      \"Contrato WF-01 nao autorizado para integracao.\"\n    );\n  }\n\n  const evento = registro.raw_event;\n\n  if (\n    !evento ||\n    typeof evento !== \"object\" ||\n    Array.isArray(evento)\n  ) {\n    throw new Error(\"raw_event invalido.\");\n  }\n\n  if (\n    registro.collection_sequence !== indice + 1 ||\n    evento.sample_case !== casosEsperados[indice] ||\n    !evento.source_event_id ||\n    !evento.occurred_at ||\n    !evento.event_type ||\n    !evento.severity ||\n    !evento.entity ||\n    !Array.isArray(evento.evidence) ||\n    evento.evidence.length === 0\n  ) {\n    throw new Error(\n      \"Sequencia ou dados do evento LAB inconsistentes.\"\n    );\n  }\n\n  return {\n    json: {\n\n      schema_version: registro.schema_version,\n      environment: registro.environment,\n\n      source: registro.source,\n\n      source_event_id: evento.source_event_id,\n      occurred_at: evento.occurred_at,\n      event_type: evento.event_type,\n      severity: evento.severity,\n\n      entity: evento.entity,\n      evidence: evento.evidence,\n\n      sample_case: evento.sample_case,\n\n      collection_id: registro.collection_id,\n      collection_sequence: registro.collection_sequence,\n\n      collected_at: registro.collected_at,\n      ingested_at: registro.ingested_at,\n\n      validation: registro.validation,\n\n      collector: \"WF-01\",\n\n      collection_status: registro.collection_status,\n\n      integration_origin: \"WF-01\",\n      integration_target: \"WF-02\",\n      integration_mode: \"LAB_MOCK\",\n\n      dispatch_status: \"MOCK_ONLY\",\n      real_execution_started: false,\n\n      raw_event: evento\n    }\n  };\n\n});"
+      },
+      "id": "36be634f-6891-4417-b3da-e58db281f014",
+      "name": "04 - Adaptar Contrato WF-01 para WF-02",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1140,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const entradas = $input.all();\n\nconst historico = new Map();\n\nfunction canonicalizar(valor) {\n  if (Array.isArray(valor)) {\n    return valor.map(canonicalizar);\n  }\n\n  if (valor && typeof valor === \"object\") {\n    return Object.fromEntries(\n      Object.keys(valor)\n        .sort()\n        .map(chave => [\n          chave,\n          canonicalizar(valor[chave])\n        ])\n    );\n  }\n\n  return valor;\n}\n\nfunction assinatura(valor) {\n  return JSON.stringify(canonicalizar(valor));\n}\n\nfunction listaUnica(valores) {\n  return [...new Set(valores)].sort();\n}\n\nconst resultados = [];\n\nfor (const entrada of entradas) {\n\n  const evento = entrada.json;\n\n  if (\n    evento.environment !== \"LAB\" ||\n    evento.validation?.status !== \"VALID\"\n  ) {\n    throw new Error(\n      \"Evento invalido ou fora do ambiente LAB.\"\n    );\n  }\n\n  const obrigatorios = [\n    \"source\",\n    \"source_event_id\",\n    \"occurred_at\",\n    \"event_type\",\n    \"severity\"\n  ];\n\n  for (const campo of obrigatorios) {\n    if (!evento[campo]) {\n      throw new Error(\n        `Campo obrigatorio ausente: ${campo}`\n      );\n    }\n  }\n\n  if (\n    !Array.isArray(evento.evidence) ||\n    evento.evidence.length === 0\n  ) {\n    throw new Error(\"Evento sem evidencias.\");\n  }\n\n  const ids = evento.evidence.map(\n    evidencia => evidencia.evidence_id\n  );\n\n  if (\n    ids.some(id => !id) ||\n    new Set(ids).size !== ids.length\n  ) {\n    throw new Error(\n      \"Identificadores de evidencias invalidos.\"\n    );\n  }\n\n  const identityKey = assinatura([\n    evento.source,\n    evento.source_event_id,\n    evento.event_type\n  ]);\n\n  const entidade = canonicalizar(evento.entity ?? {});\n\n  const evidencias = [...evento.evidence]\n    .map(canonicalizar)\n    .sort((a, b) =>\n      a.evidence_id.localeCompare(b.evidence_id)\n    );\n\n  const normalized = {\n    source: evento.source,\n    source_event_id: evento.source_event_id,\n    occurred_at: evento.occurred_at,\n    event_type: evento.event_type,\n    severity: evento.severity,\n    entity: entidade,\n    evidence: evidencias\n  };\n\n  // Campos de transporte, horario da coleta e sample_case\n  // nao fazem parte da assinatura de deduplicacao.\n\n  const contentSignature = assinatura(normalized);\n\n  const anterior = historico.get(identityKey);\n\n  let status;\n  let shouldAnalyze;\n  let changedFields = [];\n  let newEvidenceIds = [];\n\n  if (!anterior) {\n\n    status = \"NEW_EVENT\";\n    shouldAnalyze = true;\n\n    historico.set(identityKey, {\n      occurrenceCount: 1,\n      version: 1,\n      latest: normalized,\n      latestSignature: contentSignature,\n      knownSignatures: new Set([contentSignature])\n    });\n\n  } else {\n\n    anterior.occurrenceCount += 1;\n\n    if (\n      anterior.knownSignatures.has(contentSignature)\n    ) {\n\n      status = \"EXACT_REPEAT\";\n      shouldAnalyze = false;\n\n    } else {\n\n      status = \"MATERIAL_UPDATE\";\n      shouldAnalyze = true;\n\n      const antigo = anterior.latest;\n\n      if (antigo.severity !== normalized.severity) {\n        changedFields.push(\"severity\");\n      }\n\n      if (\n        assinatura(antigo.entity) !==\n        assinatura(normalized.entity)\n      ) {\n        changedFields.push(\"entity\");\n      }\n\n      const antigosIds = new Set(\n        antigo.evidence.map(e => e.evidence_id)\n      );\n\n      newEvidenceIds = normalized.evidence\n        .map(e => e.evidence_id)\n        .filter(id => !antigosIds.has(id));\n\n      if (\n        assinatura(antigo.evidence) !==\n        assinatura(normalized.evidence)\n      ) {\n        changedFields.push(\"evidence\");\n      }\n\n      if (\n        antigo.occurred_at !== normalized.occurred_at\n      ) {\n        changedFields.push(\"occurred_at\");\n      }\n\n      anterior.version += 1;\n      anterior.latest = normalized;\n      anterior.latestSignature = contentSignature;\n      anterior.knownSignatures.add(contentSignature);\n\n    }\n  }\n\n  const atual = historico.get(identityKey);\n\n  resultados.push({\n    json: {\n      schema_version: \"1.0\",\n      environment: \"LAB\",\n      processor: \"WF-02\",\n\n      collection_sequence:\n        evento.collection_sequence,\n\n      sample_case: evento.sample_case,\n\n      identity_key: identityKey,\n\n      content_signature: contentSignature,\n\n      normalized_event: normalized,\n\n      deduplication: {\n        status,\n        occurrence_count: atual.occurrenceCount,\n        investigation_version: atual.version,\n        changed_fields: listaUnica(changedFields),\n        new_evidence_ids: listaUnica(newEvidenceIds)\n      },\n\n      decision: {\n        should_analyze: shouldAnalyze,\n        target_workflow: shouldAnalyze\n          ? \"WF-03\"\n          : null,\n        reason:\n          status === \"NEW_EVENT\"\n            ? \"Primeira ocorrencia.\"\n            : status === \"EXACT_REPEAT\"\n              ? \"Conteudo previamente observado.\"\n              : \"Novas informacoes relevantes.\"\n      },\n\n      dispatch_status: \"MOCK_ONLY\",\n      real_execution_started: false,\n      processed_at: new Date().toISOString()\n    }\n  });\n\n}\n\nreturn resultados;"
+      },
+      "id": "a9568175-30d9-47a1-8669-742a34037fdc",
+      "name": "02 - Normalizar e Deduplicar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const registros = $input.all();\n\nconst permitidos = new Set([\n  \"NEW_EVENT\",\n  \"EXACT_REPEAT\",\n  \"MATERIAL_UPDATE\"\n]);\n\nreturn registros.map(item => {\n\n  const registro = item.json;\n\n  const status = registro.deduplication?.status;\n\n  if (!permitidos.has(status)) {\n    throw new Error(\n      \"Classificacao de deduplicacao invalida.\"\n    );\n  }\n\n  if (\n    status === \"EXACT_REPEAT\" &&\n    registro.decision.should_analyze !== false\n  ) {\n    throw new Error(\n      \"Repeticao nao pode solicitar nova analise.\"\n    );\n  }\n\n  if (\n    status !== \"EXACT_REPEAT\" &&\n    registro.decision.should_analyze !== true\n  ) {\n    throw new Error(\n      \"Evento novo ou atualizado deveria ser elegivel.\"\n    );\n  }\n\n  return {\n    json: {\n      ...registro,\n      audit: {\n        status: \"VALIDATED\",\n        persistence: \"NOT_ENABLED\",\n        notification_sent: false,\n        ai_executed: false,\n        checked_at: new Date().toISOString()\n      }\n    }\n  };\n\n});"
+      },
+      "id": "14c511d8-a889-4969-901b-5c76491ca827",
+      "name": "03 - Validar Decisoes e Auditoria",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1580,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "00 - Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "01 - Coletar Eventos Sinteticos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "01 - Coletar Eventos Sinteticos": {
+      "main": [
+        [
+          {
+            "node": "02 - Validar Eventos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 - Validar Eventos": {
+      "main": [
+        [
+          {
+            "node": "03 - Preparar Entrega ao WF-02",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "03 - Preparar Entrega ao WF-02": {
+      "main": [
+        [
+          {
+            "node": "04 - Adaptar Contrato WF-01 para WF-02",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "04 - Adaptar Contrato WF-01 para WF-02": {
+      "main": [
+        [
+          {
+            "node": "02 - Normalizar e Deduplicar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 - Normalizar e Deduplicar": {
+      "main": [
+        [
+          {
+            "node": "03 - Validar Decisoes e Auditoria",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

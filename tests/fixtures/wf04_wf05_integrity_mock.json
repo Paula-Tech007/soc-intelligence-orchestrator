@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0",
+  "environment": "LAB",
+  "origin": "WF-04",
+  "fixture_type": "MOCK_AI_RESPONSE",
+  "real_ollama_call": false,
+  "ready_for_operational_dispatch": false,
+  "results": [
+    {
+      "schema_version": "1.0",
+      "environment": "LAB",
+      "processor": "WF-04",
+      "queue_id": 12,
+      "investigation_id": "8eb57aa6-8249-4b48-bfe9-c00bb0d324d9",
+      "source_event_id": "LAB-0001",
+      "investigation_version": 1,
+      "provenance": {
+        "database": "soc_intelligence",
+        "table": "investigation_versions",
+        "version": 1,
+        "content_signature": "bc6877a0a006c7371cfe64b6d1da0629eb291ca848aab2487421539992259d6f"
+      },
+      "dispatch_status": "MOCK_ONLY",
+      "real_execution_started": false,
+      "notification_sent": false,
+      "status": "SKIPPED",
+      "reason": "Contexto nao elegivel para IA.",
+      "ai_executed": false,
+      "requires_human_review": false,
+      "analysis": null
+    },
+    {
+      "schema_version": "1.0",
+      "environment": "LAB",
+      "processor": "WF-04",
+      "queue_id": 13,
+      "investigation_id": "8eb57aa6-8249-4b48-bfe9-c00bb0d324d9",
+      "source_event_id": "LAB-0001",
+      "investigation_version": 2,
+      "provenance": {
+        "database": "soc_intelligence",
+        "table": "investigation_versions",
+        "version": 2,
+        "content_signature": "30a180b436306e413da458a3d2d307a864e3a812cc0460dc689c1ee97dbf7978"
+      },
+      "dispatch_status": "MOCK_ONLY",
+      "real_execution_started": false,
+      "notification_sent": false,
+      "status": "ANALYSIS_COMPLETED",
+      "model": "qwen3:4b-instruct",
+      "ai_executed": true,
+      "requires_human_review": true,
+      "analysis": {
+        "summary": "Evento sintetico LAB-0001 encaminhado para revisao humana.",
+        "assessment": "Existem duas evidencias registradas. As correlacoes sao informativas e nao comprovam um mesmo incidente.",
+        "evidence_ids": [
+          "LAB-EV-001",
+          "LAB-EV-002"
+        ],
+        "limitations": [
+          "Dados exclusivamente sinteticos.",
+          "Sem comprovacao de atividade maliciosa."
+        ],
+        "review_actions": [
+          "Revisar as evidencias do evento."
+        ]
+      },
+      "note": "Resultado assistivo; nao constitui decisao operacional automatica."
+    }
+  ],
+  "integrity": {
+    "schema_version": "1.0",
+    "mode": "LAB_MOCK",
+    "status": "VALID",
+    "registry_status": "NEW_RESULT",
+    "investigation_version": 2,
+    "content_signature": "30a180b436306e413da458a3d2d307a864e3a812cc0460dc689c1ee97dbf7978",
+    "analysis_signature": "098ccd0bb878705dd1dfd71ee628fce18014266fd0134b87aa973e4fd026556f",
+    "result_key": "a188c64efc9b917833716e6fd61bde59f95817ca7abe817006a4484dd79dce29",
+    "verified_against_database": false,
+    "operational_dispatch_allowed": false
+  },
+  "handoff": {
+    "source": "WF-04",
+    "target": "WF-05",
+    "historical_queue_id": 12,
+    "selected_queue_id": 13,
+    "selected_version": 2,
+    "status": "READY_FOR_MOCK_REPORT",
+    "human_review_required": true,
+    "operational_dispatch_allowed": false
+  },
+  "export_metadata": {
+    "schema_version": "1.0",
+    "export_mode": "LAB_MOCK",
+    "origin": "PYTHON_INTEGRITY_BRIDGE",
+    "envelope_digest": "4a1f4bf72f4de665bb64403dee2bece4bbe07948ffbf81ba41dd4bdc05d3f626",
+    "database_verified": false,
+    "real_ollama_call": false,
+    "notification_sent": false
+  }
+}

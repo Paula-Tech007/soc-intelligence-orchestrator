@@ -1,0 +1,100 @@
+{
+  "name": "WF-01 - Coleta de Eventos - SOC LAB",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "wf01-manual-trigger",
+      "name": "00 - Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const coletadoEm = new Date().toISOString();\n\nconst collectionId = `LAB-COLLECTION-${Date.now()}`;\n\nconst evidenciaOriginal = {\n  evidence_id: \"LAB-EV-001\",\n  type: \"network_connection\",\n  description: \"Conexao suspeita identificada no laboratorio.\",\n  src_ip: \"192.0.2.10\",\n  dst_ip: \"198.51.100.20\",\n  dst_port: 443\n};\n\nconst novaEvidencia = {\n  evidence_id: \"LAB-EV-002\",\n  type: \"host_observation\",\n  description: \"Novo hostname associado ao evento original.\",\n  hostname: \"lab-workstation-02\"\n};\n\nconst eventos = [\n\n  // CENARIO 01 - EVENTO NOVO\n\n  {\n    sample_case: \"NEW_EVENT\",\n    source_event_id: \"LAB-0001\",\n    occurred_at: \"2026-10-01T12:00:00Z\",\n    event_type: \"suspicious_connection\",\n    severity: \"medium\",\n    entity: {\n      hostname: \"lab-workstation-01\",\n      src_ip: \"192.0.2.10\",\n      dst_ip: \"198.51.100.20\"\n    },\n    evidence: [\n      evidenciaOriginal\n    ]\n  },\n\n  // CENARIO 02 - REPETICAO SEM NOVA EVIDENCIA\n\n  {\n    sample_case: \"EXACT_REPEAT\",\n    source_event_id: \"LAB-0001\",\n    occurred_at: \"2026-10-01T12:00:00Z\",\n    event_type: \"suspicious_connection\",\n    severity: \"medium\",\n    entity: {\n      hostname: \"lab-workstation-01\",\n      src_ip: \"192.0.2.10\",\n      dst_ip: \"198.51.100.20\"\n    },\n    evidence: [\n      evidenciaOriginal\n    ]\n  },\n\n  // CENARIO 03 - EVENTO ORIGINAL ATUALIZADO\n\n  {\n    sample_case: \"MATERIAL_UPDATE\",\n    source_event_id: \"LAB-0001\",\n    occurred_at: \"2026-10-01T12:00:00Z\",\n    event_type: \"suspicious_connection\",\n    severity: \"high\",\n    entity: {\n      hostname: \"lab-workstation-01\",\n      src_ip: \"192.0.2.10\",\n      dst_ip: \"198.51.100.20\",\n      related_hostnames: [\n        \"lab-workstation-02\"\n      ]\n    },\n    evidence: [\n      evidenciaOriginal,\n      novaEvidencia\n    ]\n  }\n\n];\n\nreturn eventos.map((evento, indice) => ({\n  json: {\n\n    schema_version: \"1.0\",\n\n    environment: \"LAB\",\n\n    collection_id: collectionId,\n\n    collection_sequence: indice + 1,\n\n    source: \"SOC-LAB\",\n\n    collected_at: coletadoEm,\n\n    ingested_at: coletadoEm,\n\n    raw_event: evento\n\n  }\n}));"
+      },
+      "id": "wf01-synthetic-collection",
+      "name": "01 - Coletar Eventos Sinteticos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const items = $input.all();\n\nfunction timestampValido(value) {\n  return (\n    typeof value === \"string\" &&\n    !Number.isNaN(Date.parse(value)) &&\n    /^\\d{4}-\\d{2}-\\d{2}T/.test(value)\n  );\n}\n\nreturn items.map((item, indice) => {\n\n  const registro = item.json;\n\n  const evento = registro.raw_event;\n\n  const erros = [];\n\n  if (registro.schema_version !== \"1.0\") {\n    erros.push(\"Versao do contrato invalida.\");\n  }\n\n  if (registro.environment !== \"LAB\") {\n    erros.push(\"Somente eventos LAB sao permitidos.\");\n  }\n\n  if (registro.source !== \"SOC-LAB\") {\n    erros.push(\"Fonte nao autorizada para este teste.\");\n  }\n\n  if (!registro.collection_id) {\n    erros.push(\"collection_id obrigatorio.\");\n  }\n\n  if (!timestampValido(registro.collected_at)) {\n    erros.push(\"collected_at invalido.\");\n  }\n\n  if (!timestampValido(registro.ingested_at)) {\n    erros.push(\"ingested_at invalido.\");\n  }\n\n  if (!evento || typeof evento !== \"object\") {\n    erros.push(\"raw_event ausente.\");\n  } else {\n\n    if (!evento.source_event_id) {\n      erros.push(\"source_event_id obrigatorio.\");\n    }\n\n    if (!timestampValido(evento.occurred_at)) {\n      erros.push(\"occurred_at invalido.\");\n    }\n\n    if (!evento.event_type) {\n      erros.push(\"event_type obrigatorio.\");\n    }\n\n    if (\n      ![\"low\", \"medium\", \"high\", \"critical\"]\n        .includes(evento.severity)\n    ) {\n      erros.push(\"severity invalida.\");\n    }\n\n    if (!evento.entity?.hostname) {\n      erros.push(\"hostname obrigatorio.\");\n    }\n\n    if (\n      !Array.isArray(evento.evidence) ||\n      evento.evidence.length === 0\n    ) {\n      erros.push(\"Lista de evidencias vazia.\");\n    } else {\n\n      const ids = evento.evidence.map(\n        evidence => evidence.evidence_id\n      );\n\n      if (ids.some(id => !id)) {\n        erros.push(\"Evidencia sem identificador.\");\n      }\n\n      if (new Set(ids).size !== ids.length) {\n        erros.push(\"Evidencias duplicadas no mesmo registro.\");\n      }\n\n    }\n\n  }\n\n  if (erros.length > 0) {\n    throw new Error(\n      `Evento ${indice + 1}: ${erros.join(\" | \")}`\n    );\n  }\n\n  return {\n    json: {\n      ...registro,\n      validation: {\n        status: \"VALID\",\n        checked_at: new Date().toISOString(),\n        errors: []\n      }\n    }\n  };\n\n});"
+      },
+      "id": "wf01-event-validation",
+      "name": "02 - Validar Eventos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const registros = $input.all();\n\nreturn registros.map(item => {\n\n  const registro = item.json;\n\n  if (registro.validation?.status !== \"VALID\") {\n    throw new Error(\n      \"Evento sem validacao. Entrega bloqueada.\"\n    );\n  }\n\n  return {\n    json: {\n\n      ...registro,\n\n      collector: \"WF-01\",\n\n      target_workflow: \"WF-02\",\n\n      collection_status: \"COLLECTED_VALIDATED\",\n\n      dispatch_status: \"MOCK_ONLY\",\n\n      real_execution_started: false,\n\n      note:\n        \"Evento coletado e validado. \" +\n        \"Deduplicacao reservada para o WF-02.\"\n\n    }\n  };\n\n});"
+      },
+      "id": "wf01-prepare-delivery",
+      "name": "03 - Preparar Entrega ao WF-02",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "00 - Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "01 - Coletar Eventos Sinteticos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "01 - Coletar Eventos Sinteticos": {
+      "main": [
+        [
+          {
+            "node": "02 - Validar Eventos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 - Validar Eventos": {
+      "main": [
+        [
+          {
+            "node": "03 - Preparar Entrega ao WF-02",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Sao_Paulo"
+  },
+  "active": false,
+  "pinData": {},
+  "tags": []
+}

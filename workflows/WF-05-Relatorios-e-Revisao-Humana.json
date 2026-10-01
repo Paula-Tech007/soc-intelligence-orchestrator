@@ -1,0 +1,124 @@
+{
+  "name": "SOC LAB - WF-05 - Relatorios e Revisao Humana - MOCK",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "0cb86a11-edea-46b4-b8cf-0eda517acae7",
+      "name": "01 - Iniciar WF-05",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        200,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "\nconst fixture = {\"schema_version\": \"1.0\", \"environment\": \"LAB\", \"origin\": \"WF-04\", \"fixture_type\": \"MOCK_AI_RESPONSE\", \"real_ollama_call\": false, \"ready_for_operational_dispatch\": false, \"results\": [{\"schema_version\": \"1.0\", \"environment\": \"LAB\", \"processor\": \"WF-04\", \"queue_id\": 12, \"investigation_id\": \"8eb57aa6-8249-4b48-bfe9-c00bb0d324d9\", \"source_event_id\": \"LAB-0001\", \"investigation_version\": 1, \"provenance\": {\"database\": \"soc_intelligence\", \"table\": \"investigation_versions\", \"version\": 1, \"content_signature\": \"bc6877a0a006c7371cfe64b6d1da0629eb291ca848aab2487421539992259d6f\"}, \"dispatch_status\": \"MOCK_ONLY\", \"real_execution_started\": false, \"notification_sent\": false, \"status\": \"SKIPPED\", \"reason\": \"Contexto nao elegivel para IA.\", \"ai_executed\": false, \"requires_human_review\": false, \"analysis\": null}, {\"schema_version\": \"1.0\", \"environment\": \"LAB\", \"processor\": \"WF-04\", \"queue_id\": 13, \"investigation_id\": \"8eb57aa6-8249-4b48-bfe9-c00bb0d324d9\", \"source_event_id\": \"LAB-0001\", \"investigation_version\": 2, \"provenance\": {\"database\": \"soc_intelligence\", \"table\": \"investigation_versions\", \"version\": 2, \"content_signature\": \"30a180b436306e413da458a3d2d307a864e3a812cc0460dc689c1ee97dbf7978\"}, \"dispatch_status\": \"MOCK_ONLY\", \"real_execution_started\": false, \"notification_sent\": false, \"status\": \"ANALYSIS_COMPLETED\", \"model\": \"qwen3:4b-instruct\", \"ai_executed\": true, \"requires_human_review\": true, \"analysis\": {\"summary\": \"Evento sintetico LAB-0001 encaminhado para revisao humana.\", \"assessment\": \"Existem duas evidencias registradas. As correlacoes sao informativas e nao comprovam um mesmo incidente.\", \"evidence_ids\": [\"LAB-EV-001\", \"LAB-EV-002\"], \"limitations\": [\"Dados exclusivamente sinteticos.\", \"Sem comprovacao de atividade maliciosa.\"], \"review_actions\": [\"Revisar as evidencias do evento.\"]}, \"note\": \"Resultado assistivo; nao constitui decisao operacional automatica.\"}]};\n\nreturn [{\n  json: {\n    ...fixture,\n    integration_mode: 'MOCK_SNAPSHOT'\n  }\n}];\n"
+      },
+      "id": "2bb51c80-ebc9-4e4d-99b3-37fa4ed7e7e1",
+      "name": "02 - Carregar Contrato WF-04",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "\nconst items = $input.all();\n\nif (items.length !== 1) {\n  throw new Error('Esperado um contrato WF-04.');\n}\n\nconst d = items[0].json;\n\nif (\n  d.schema_version !== '1.0' ||\n  d.environment !== 'LAB' ||\n  d.origin !== 'WF-04' ||\n  d.fixture_type !== 'MOCK_AI_RESPONSE' ||\n  d.real_ollama_call !== false ||\n  d.ready_for_operational_dispatch !== false ||\n  d.integration_mode !== 'MOCK_SNAPSHOT'\n) {\n  throw new Error('Contrato geral nao autorizado.');\n}\n\nif (!Array.isArray(d.results) || d.results.length !== 2) {\n  throw new Error('Quantidade de resultados invalida.');\n}\n\nconst historical = d.results.find(\n  r => r.investigation_version === 1\n);\n\nconst current = d.results.find(\n  r => r.investigation_version === 2\n);\n\nif (!historical || !current) {\n  throw new Error('Versoes 1 e 2 obrigatorias.');\n}\n\nfor (const r of [historical, current]) {\n\n  if (\n    r.environment !== 'LAB' ||\n    r.processor !== 'WF-04' ||\n    r.schema_version !== '1.0' ||\n    r.dispatch_status !== 'MOCK_ONLY' ||\n    r.real_execution_started !== false ||\n    r.notification_sent !== false ||\n    !r.provenance ||\n    r.provenance.version !== r.investigation_version ||\n    !/^[a-f0-9]{64}$/.test(\n      r.provenance.content_signature || ''\n    )\n  ) {\n    throw new Error('Identidade ou proveniencia invalida.');\n  }\n}\n\nif (\n  historical.queue_id !== 12 ||\n  historical.source_event_id !== 'LAB-0001' ||\n  historical.status !== 'SKIPPED' ||\n  historical.ai_executed !== false ||\n  historical.analysis !== null ||\n  historical.requires_human_review !== false\n) {\n  throw new Error('Versao historica nao foi bloqueada.');\n}\n\nif (\n  current.queue_id !== 13 ||\n  current.source_event_id !== 'LAB-0001' ||\n  current.investigation_id !== historical.investigation_id ||\n  current.status !== 'ANALYSIS_COMPLETED' ||\n  current.ai_executed !== true ||\n  current.requires_human_review !== true ||\n  !current.analysis\n) {\n  throw new Error('Versao atual nao autorizada.');\n}\n\nconst a = current.analysis;\n\nif (\n  typeof a.summary !== 'string' ||\n  !a.summary.trim() ||\n  typeof a.assessment !== 'string' ||\n  !a.assessment.trim()\n) {\n  throw new Error('Resumo ou avaliacao ausente.');\n}\n\nfor (const field of [\n  'evidence_ids',\n  'limitations',\n  'review_actions'\n]) {\n\n  if (\n    !Array.isArray(a[field]) ||\n    !a[field].every(\n      v => typeof v === 'string' && v.trim().length > 0\n    )\n  ) {\n    throw new Error('Campo invalido: ' + field);\n  }\n}\n\nconst ids = a.evidence_ids;\n\nif (\n  ids.length !== 2 ||\n  !ids.includes('LAB-EV-001') ||\n  !ids.includes('LAB-EV-002')\n) {\n  throw new Error('Referencias de evidencias invalidas.');\n}\n\nreturn [{\n  json: {\n    ...d,\n    contract_validation: 'VALID',\n    historical_queue_id: historical.queue_id,\n    selected_queue_id: current.queue_id,\n    selected_version: current.investigation_version,\n    selected_signature: current.provenance.content_signature\n  }\n}];\n"
+      },
+      "id": "35ad5e9b-dbba-4006-ad00-869aad934e74",
+      "name": "03 - Validar Contrato e Versoes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "\nconst d = $input.first().json;\n\nif (\n  d.contract_validation !== 'VALID' ||\n  d.selected_queue_id !== 13 ||\n  d.selected_version !== 2 ||\n  d.integration_mode !== 'MOCK_SNAPSHOT'\n) {\n  throw new Error('Contrato nao liberado para relatorio.');\n}\n\nconst html = \"<!DOCTYPE html>\\n<html lang=\\\"pt-BR\\\">\\n<head>\\n<meta charset=\\\"UTF-8\\\">\\n<meta name=\\\"viewport\\\" content=\\\"width=device-width, initial-scale=1\\\">\\n<title>WF-05 | SOC Intelligence Orchestrator</title>\\n\\n<style>\\n* {\\n    box-sizing: border-box;\\n}\\n\\nbody {\\n    margin: 0;\\n    padding: 32px 20px;\\n    background: #f2f5fa;\\n    color: #172c4e;\\n    font-family: \\\"Segoe UI\\\", Arial, sans-serif;\\n    font-size: 14px;\\n    line-height: 1.6;\\n}\\n\\nmain {\\n    max-width: 1120px;\\n    margin: auto;\\n    background: #ffffff;\\n    border: 1px solid #e4eaf2;\\n    border-radius: 12px;\\n    padding: 32px;\\n    box-shadow: 0 6px 28px rgba(25, 48, 83, .05);\\n}\\n\\n.header {\\n    display: flex;\\n    justify-content: space-between;\\n    align-items: center;\\n    gap: 24px;\\n    margin-bottom: 24px;\\n}\\n\\nh1 {\\n    margin: 0;\\n    color: #112a50;\\n    font-size: 27px;\\n    line-height: 1.25;\\n}\\n\\n.subtitle {\\n    margin: 5px 0 0;\\n    color: #61748f;\\n    font-size: 15px;\\n}\\n\\n.date {\\n    padding: 12px 18px;\\n    background: #f3f6fa;\\n    border-radius: 8px;\\n    color: #526680;\\n    white-space: nowrap;\\n}\\n\\n.notice {\\n    display: flex;\\n    gap: 18px;\\n    align-items: center;\\n    background: #edf4ff;\\n    border: 1px solid #c5dcff;\\n    border-radius: 8px;\\n    padding: 16px 20px;\\n    margin-bottom: 26px;\\n}\\n\\n.notice-icon {\\n    display: flex;\\n    justify-content: center;\\n    align-items: center;\\n    flex-shrink: 0;\\n    width: 48px;\\n    height: 48px;\\n    border-radius: 8px;\\n    background: #dceafe;\\n    color: #1265c8;\\n    font-size: 25px;\\n}\\n\\n.notice strong {\\n    color: #174a94;\\n}\\n\\n.notice p {\\n    margin: 4px 0 0;\\n}\\n\\nh2 {\\n    margin: 0 0 12px;\\n    font-size: 18px;\\n    font-weight: 700;\\n    color: #102a50;\\n}\\n\\n.section {\\n    padding: 18px 0;\\n    border-bottom: 1px solid #e1e8f0;\\n}\\n\\n.section:first-of-type {\\n    padding-top: 0;\\n}\\n\\n.section p {\\n    margin: 0 0 0 28px;\\n    color: #40546f;\\n}\\n\\n.meta {\\n    display: grid;\\n    grid-template-columns: repeat(3, minmax(0, 1fr));\\n    gap: 12px;\\n}\\n\\n.meta-card {\\n    min-width: 0;\\n    background: #f5f7fa;\\n    border: 1px solid #e9eef5;\\n    border-radius: 7px;\\n    padding: 14px 17px;\\n}\\n\\n.meta-label {\\n    display: block;\\n    color: #708099;\\n    font-size: 12px;\\n    margin-bottom: 3px;\\n}\\n\\n.meta-value {\\n    display: block;\\n    font-weight: 600;\\n    color: #18345e;\\n    overflow-wrap: anywhere;\\n}\\n\\n.meta-value.regular {\\n    font-weight: 400;\\n}\\n\\n.content {\\n    margin-left: 28px;\\n}\\n\\n.content p {\\n    margin: 0;\\n}\\n\\nul {\\n    margin: 4px 0;\\n    padding-left: 20px;\\n    color: #40546f;\\n}\\n\\n.info {\\n    background: #f5f8fc;\\n    border-radius: 7px;\\n    padding: 14px 18px;\\n}\\n\\n.note {\\n    margin-top: 9px !important;\\n    margin-left: 0 !important;\\n    font-size: 12px;\\n    color: #6a7e97 !important;\\n}\\n\\n.bottom-grid {\\n    display: grid;\\n    grid-template-columns: 1.2fr 0.8fr;\\n    gap: 16px;\\n    margin-top: 22px;\\n}\\n\\n.bottom-card {\\n    min-width: 0;\\n    padding: 20px;\\n    background: #f4f8ff;\\n    border: 1px solid #dbe9fd;\\n    border-radius: 8px;\\n}\\n\\n.bottom-card.version {\\n    background: #f1faf5;\\n    border-color: #d7eee0;\\n}\\n\\n.bottom-card h2 {\\n    font-size: 16px;\\n}\\n\\n.trace {\\n    display: grid;\\n    grid-template-columns: 155px minmax(0, 1fr);\\n    gap: 5px 12px;\\n    font-size: 12px;\\n}\\n\\n.trace strong {\\n    color: #38516e;\\n}\\n\\n.trace span {\\n    overflow-wrap: anywhere;\\n}\\n\\n.bottom-card p {\\n    margin: 0;\\n    font-size: 13px;\\n    color: #40546f;\\n}\\n\\nfooter {\\n    display: flex;\\n    justify-content: space-between;\\n    gap: 16px;\\n    border-top: 1px solid #e1e8f0;\\n    padding-top: 18px;\\n    margin-top: 25px;\\n    font-size: 12px;\\n    color: #728199;\\n}\\n\\n@media (max-width: 760px) {\\n    body {\\n        padding: 10px;\\n    }\\n\\n    main {\\n        padding: 20px;\\n    }\\n\\n    .header,\\n    footer {\\n        flex-direction: column;\\n        align-items: flex-start;\\n    }\\n\\n    .date {\\n        white-space: normal;\\n    }\\n\\n    .meta {\\n        grid-template-columns: repeat(2, minmax(0, 1fr));\\n    }\\n\\n    .bottom-grid {\\n        grid-template-columns: 1fr;\\n    }\\n}\\n\\n@media (max-width: 480px) {\\n    .meta {\\n        grid-template-columns: 1fr;\\n    }\\n\\n    .trace {\\n        grid-template-columns: 1fr;\\n    }\\n}\\n\\n@media print {\\n    body {\\n        background: white;\\n        padding: 0;\\n    }\\n\\n    main {\\n        border: 0;\\n        box-shadow: none;\\n        max-width: none;\\n        padding: 8px;\\n    }\\n\\n    .meta-card,\\n    .bottom-card,\\n    .notice {\\n        break-inside: avoid;\\n    }\\n}\\n</style>\\n</head>\\n\\n<body>\\n<main>\\n\\n<header class=\\\"header\\\">\\n    <div>\\n        <h1>SOC Intelligence Orchestrator</h1>\\n        <p class=\\\"subtitle\\\">\\n            WF-05 | Relat\\u00f3rio de an\\u00e1lise assistiva\\n        </p>\\n    </div>\\n\\n    <div class=\\\"date\\\">\\n        <strong>Gerado em:</strong><br>\\n        01/10/2026<br>\\n        <strong>16:47:45</strong><br>\\n        <small>UTC-0300</small>\\n        <hr style=\\\"border:0;border-top:1px solid #dce4ef;margin:8px 0;\\\">\\n        <strong>Ambiente:</strong> LAB<br>\\n        <strong>Origem:</strong> WF-04 / MOCK\\n    </div>\\n</header>\\n\\n<div class=\\\"notice\\\">\\n    <div class=\\\"notice-icon\\\" aria-hidden=\\\"true\\\">&#9881;</div>\\n\\n    <div>\\n        <strong>LABORATORIO - ANALISE SIMULADA</strong>\\n        <p>\\n            Este documento utiliza uma resposta simulada do WF-04.\\n            O n8n n\\u00e3o executou uma chamada real ao Ollama.\\n            Nenhuma a\\u00e7\\u00e3o operacional foi realizada.\\n        </p>\\n    </div>\\n</div>\\n\\n<section class=\\\"section\\\">\\n    <h2>Identifica\\u00e7\\u00e3o</h2>\\n\\n    <div class=\\\"meta\\\">\\n\\n        <div class=\\\"meta-card\\\">\\n            <span class=\\\"meta-label\\\">Evento</span>\\n            <span class=\\\"meta-value\\\">\\n                LAB-0001\\n            </span>\\n        </div>\\n\\n        <div class=\\\"meta-card\\\">\\n            <span class=\\\"meta-label\\\">Queue ID</span>\\n            <span class=\\\"meta-value\\\">\\n                13\\n            </span>\\n        </div>\\n\\n        <div class=\\\"meta-card\\\">\\n            <span class=\\\"meta-label\\\">Vers\\u00e3o analisada</span>\\n            <span class=\\\"meta-value\\\">\\n                2\\n            </span>\\n        </div>\\n\\n        <div class=\\\"meta-card\\\">\\n            <span class=\\\"meta-label\\\">Investiga\\u00e7\\u00e3o</span>\\n            <span class=\\\"meta-value regular\\\">\\n                8eb57aa6-8249-4b48-bfe9-c00bb0d324d9\\n            </span>\\n        </div>\\n\\n        <div class=\\\"meta-card\\\">\\n            <span class=\\\"meta-label\\\">Status</span>\\n            <span class=\\\"meta-value\\\">\\n                ANALYSIS_COMPLETED\\n            </span>\\n        </div>\\n\\n        <div class=\\\"meta-card\\\">\\n            <span class=\\\"meta-label\\\">Modelo declarado</span>\\n            <span class=\\\"meta-value regular\\\">\\n                qwen3:4b-instruct\\n                (resposta MOCK)\\n            </span>\\n        </div>\\n\\n    </div>\\n</section>\\n\\n<section class=\\\"section\\\">\\n    <h2>Resumo da an\\u00e1lise</h2>\\n    <div class=\\\"content\\\">\\n        <p>Evento sintetico LAB-0001 encaminhado para revisao humana.</p>\\n    </div>\\n</section>\\n\\n<section class=\\\"section\\\">\\n    <h2>Avalia\\u00e7\\u00e3o assistiva</h2>\\n    <div class=\\\"content\\\">\\n        <p>Existem duas evidencias registradas. As correlacoes sao informativas e nao comprovam um mesmo incidente.</p>\\n    </div>\\n</section>\\n\\n<section class=\\\"section\\\">\\n    <h2>Refer\\u00eancias das evid\\u00eancias</h2>\\n\\n    <div class=\\\"content info\\\">\\n        <ul>\\n            <li>LAB-EV-001</li>\\n<li>LAB-EV-002</li>\\n        </ul>\\n\\n        <p class=\\\"note\\\">\\n            O contrato WF-04 fornece somente as refer\\u00eancias\\n            das evid\\u00eancias. O conte\\u00fado original dever\\u00e1 ser\\n            consultado durante a revis\\u00e3o humana.\\n        </p>\\n    </div>\\n</section>\\n\\n<section class=\\\"section\\\">\\n    <h2>Limita\\u00e7\\u00f5es da an\\u00e1lise</h2>\\n\\n    <div class=\\\"content\\\">\\n        <ul>\\n            <li>Dados exclusivamente sinteticos.</li>\\n<li>Sem comprovacao de atividade maliciosa.</li>\\n        </ul>\\n    </div>\\n</section>\\n\\n<section class=\\\"section\\\">\\n    <h2>Sugest\\u00f5es para revis\\u00e3o humana</h2>\\n\\n    <div class=\\\"content\\\">\\n        <ul>\\n            <li>Revisar as evidencias do evento.</li>\\n        </ul>\\n    </div>\\n</section>\\n\\n<div class=\\\"bottom-grid\\\">\\n\\n    <div class=\\\"bottom-card\\\">\\n        <h2>Rastreabilidade</h2>\\n\\n        <div class=\\\"trace\\\">\\n            <strong>Base declarada:</strong>\\n            <span>soc_intelligence</span>\\n\\n            <strong>Tabela declarada:</strong>\\n            <span>investigation_versions</span>\\n\\n            <strong>Vers\\u00e3o:</strong>\\n            <span>2</span>\\n\\n            <strong>Assinatura:</strong>\\n            <span>30a180b436306e413da458a3d2d307a864e3a812cc0460dc689c1ee97dbf7978</span>\\n        </div>\\n    </div>\\n\\n    <div class=\\\"bottom-card version\\\">\\n        <h2>Controle de vers\\u00f5es</h2>\\n\\n        <p>\\n            A vers\\u00e3o\\n            <strong>1</strong>\\n            (queue 12)\\n            foi classificada como\\n            <strong>SKIPPED</strong>\\n            e n\\u00e3o foi inclu\\u00edda na an\\u00e1lise.\\n        </p>\\n    </div>\\n\\n</div>\\n\\n<footer>\\n    <span>SOC Intelligence Orchestrator | Ambiente LAB</span>\\n\\n    <span>\\n        Revis\\u00e3o humana obrigat\\u00f3ria.\\n        Documento sem finalidade operacional.\\n    </span>\\n</footer>\\n\\n</main>\\n</body>\\n</html>\\n\";\n\nif (\n  typeof html !== 'string' ||\n  !html.includes('LABORATORIO - ANALISE SIMULADA') ||\n  !html.includes(d.selected_signature) ||\n  !html.includes('LAB-EV-001') ||\n  !html.includes('LAB-EV-002')\n) {\n  throw new Error('Snapshot HTML inconsistente.');\n}\n\nreturn [{\n  json: {\n    schema_version: '1.0',\n    environment: 'LAB',\n    processor: 'WF-05',\n    integration_mode: 'MOCK_SNAPSHOT',\n    report_status: 'HTML_PREPARED',\n    source_event_id: 'LAB-0001',\n    queue_id: d.selected_queue_id,\n    investigation_version: d.selected_version,\n    historical_queue_id: d.historical_queue_id,\n    content_signature: d.selected_signature,\n    html_sha256_at_export: '23335000ec988a3b88d00dbfd4f45504a1feee4934484f3c406e915aadb80432',\n    html,\n    real_ollama_call: false,\n    ready_for_operational_dispatch: false,\n    notification_sent: false,\n    human_review_required: true,\n    human_review_completed: false\n  }\n}];\n"
+      },
+      "id": "4bfb6265-32be-4486-852e-22b5cf16652b",
+      "name": "04 - Preparar HTML SOC",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        950,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "\nconst r = $input.first().json;\n\nif (\n  r.report_status !== 'HTML_PREPARED' ||\n  r.environment !== 'LAB' ||\n  r.integration_mode !== 'MOCK_SNAPSHOT' ||\n  r.human_review_required !== true ||\n  r.human_review_completed !== false ||\n  r.notification_sent !== false ||\n  r.ready_for_operational_dispatch !== false\n) {\n  throw new Error('Contrato de revisao invalido.');\n}\n\nreturn [{\n  json: {\n    ...r,\n    report_status: 'AWAITING_HUMAN_REVIEW',\n    decision: {\n      eligible_for_human_review: true,\n      review_mode: 'MOCK_ONLY',\n      automatically_approved: false,\n      operational_dispatch_allowed: false,\n      reason: 'Relatorio LAB preparado para inspecao humana.'\n    }\n  }\n}];\n"
+      },
+      "id": "c590ff30-5971-4bf0-9618-ad7535205c69",
+      "name": "05 - Preparar Revisao Humana",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "01 - Iniciar WF-05": {
+      "main": [
+        [
+          {
+            "node": "02 - Carregar Contrato WF-04",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 - Carregar Contrato WF-04": {
+      "main": [
+        [
+          {
+            "node": "03 - Validar Contrato e Versoes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "03 - Validar Contrato e Versoes": {
+      "main": [
+        [
+          {
+            "node": "04 - Preparar HTML SOC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "04 - Preparar HTML SOC": {
+      "main": [
+        [
+          {
+            "node": "05 - Preparar Revisao Humana",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false,
+  "pinData": {},
+  "tags": []
+}

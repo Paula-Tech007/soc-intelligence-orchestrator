@@ -1,0 +1,33 @@
+﻿# Variaveis e credenciais
+.env
+.env.*
+!.env.example
+secrets/
+credentials/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Logs e arquivos temporarios
+*.log
+*.tmp
+
+# Dados privados
+reports/private/
+data/private/
+
+# IDE
+.vscode/settings.json
+*.py[cod]
+*.backup-*
+
+# Protecoes adicionais para publicacao
+node_modules/
+backups/
+*.dump
+*.backup
+*.pem
+*.key

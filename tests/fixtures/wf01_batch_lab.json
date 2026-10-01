@@ -1,0 +1,131 @@
+[
+  {
+    "schema_version": "1.0",
+    "environment": "LAB",
+    "collection_id": "LAB-BRIDGE-0359fac7f830",
+    "collection_sequence": 1,
+    "source": "SOC-LAB",
+    "collected_at": "2026-10-01T18:23:34.992076+00:00",
+    "ingested_at": "2026-10-01T18:23:34.992076+00:00",
+    "raw_event": {
+      "source_event_id": "LAB-BRIDGE-EVENT-0359fac7f830",
+      "occurred_at": "2026-10-01T18:23:34.992076+00:00",
+      "event_type": "suspicious_connection",
+      "severity": "medium",
+      "entity": {
+        "hostname": "lab-workstation-01",
+        "src_ip": "192.0.2.10",
+        "dst_ip": "198.51.100.20"
+      },
+      "evidence": [
+        {
+          "evidence_id": "LAB-EV-001",
+          "type": "network_connection",
+          "description": "Conexao suspeita no laboratorio.",
+          "src_ip": "192.0.2.10",
+          "dst_ip": "198.51.100.20",
+          "dst_port": 443
+        }
+      ],
+      "sample_case": "NEW_EVENT"
+    },
+    "validation": {
+      "status": "VALID",
+      "errors": []
+    },
+    "collector": "WF-01",
+    "target_workflow": "WF-02",
+    "collection_status": "COLLECTED_VALIDATED",
+    "dispatch_status": "MOCK_ONLY",
+    "real_execution_started": false
+  },
+  {
+    "schema_version": "1.0",
+    "environment": "LAB",
+    "collection_id": "LAB-BRIDGE-0359fac7f830",
+    "collection_sequence": 2,
+    "source": "SOC-LAB",
+    "collected_at": "2026-10-01T18:23:34.992076+00:00",
+    "ingested_at": "2026-10-01T18:23:34.992076+00:00",
+    "raw_event": {
+      "source_event_id": "LAB-BRIDGE-EVENT-0359fac7f830",
+      "occurred_at": "2026-10-01T18:23:34.992076+00:00",
+      "event_type": "suspicious_connection",
+      "severity": "medium",
+      "entity": {
+        "hostname": "lab-workstation-01",
+        "src_ip": "192.0.2.10",
+        "dst_ip": "198.51.100.20"
+      },
+      "evidence": [
+        {
+          "evidence_id": "LAB-EV-001",
+          "type": "network_connection",
+          "description": "Conexao suspeita no laboratorio.",
+          "src_ip": "192.0.2.10",
+          "dst_ip": "198.51.100.20",
+          "dst_port": 443
+        }
+      ],
+      "sample_case": "EXACT_REPEAT"
+    },
+    "validation": {
+      "status": "VALID",
+      "errors": []
+    },
+    "collector": "WF-01",
+    "target_workflow": "WF-02",
+    "collection_status": "COLLECTED_VALIDATED",
+    "dispatch_status": "MOCK_ONLY",
+    "real_execution_started": false
+  },
+  {
+    "schema_version": "1.0",
+    "environment": "LAB",
+    "collection_id": "LAB-BRIDGE-0359fac7f830",
+    "collection_sequence": 3,
+    "source": "SOC-LAB",
+    "collected_at": "2026-10-01T18:23:34.992076+00:00",
+    "ingested_at": "2026-10-01T18:23:34.992076+00:00",
+    "raw_event": {
+      "source_event_id": "LAB-BRIDGE-EVENT-0359fac7f830",
+      "occurred_at": "2026-10-01T18:23:34.992076+00:00",
+      "event_type": "suspicious_connection",
+      "severity": "high",
+      "entity": {
+        "hostname": "lab-workstation-01",
+        "src_ip": "192.0.2.10",
+        "dst_ip": "198.51.100.20",
+        "related_hostnames": [
+          "lab-workstation-02"
+        ]
+      },
+      "evidence": [
+        {
+          "evidence_id": "LAB-EV-001",
+          "type": "network_connection",
+          "description": "Conexao suspeita no laboratorio.",
+          "src_ip": "192.0.2.10",
+          "dst_ip": "198.51.100.20",
+          "dst_port": 443
+        },
+        {
+          "evidence_id": "LAB-EV-002",
+          "type": "host_observation",
+          "description": "Nova evidencia associada.",
+          "hostname": "lab-workstation-02"
+        }
+      ],
+      "sample_case": "MATERIAL_UPDATE"
+    },
+    "validation": {
+      "status": "VALID",
+      "errors": []
+    },
+    "collector": "WF-01",
+    "target_workflow": "WF-02",
+    "collection_status": "COLLECTED_VALIDATED",
+    "dispatch_status": "MOCK_ONLY",
+    "real_execution_started": false
+  }
+]

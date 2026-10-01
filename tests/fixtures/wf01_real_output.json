@@ -1,0 +1,137 @@
+[
+  {
+    "schema_version": "1.0",
+    "environment": "LAB",
+    "collection_id": "LAB-COLLECTION-1790879164374",
+    "collection_sequence": 1,
+    "source": "SOC-LAB",
+    "collected_at": "2026-10-01T18:26:04.374Z",
+    "ingested_at": "2026-10-01T18:26:04.374Z",
+    "raw_event": {
+      "sample_case": "NEW_EVENT",
+      "source_event_id": "LAB-0001",
+      "occurred_at": "2026-10-01T12:00:00Z",
+      "event_type": "suspicious_connection",
+      "severity": "medium",
+      "entity": {
+        "hostname": "lab-workstation-01",
+        "src_ip": "192.0.2.10",
+        "dst_ip": "198.51.100.20"
+      },
+      "evidence": [
+        {
+          "evidence_id": "LAB-EV-001",
+          "type": "network_connection",
+          "description": "Conexao suspeita identificada no laboratorio.",
+          "src_ip": "192.0.2.10",
+          "dst_ip": "198.51.100.20",
+          "dst_port": 443
+        }
+      ]
+    },
+    "validation": {
+      "status": "VALID",
+      "checked_at": "2026-10-01T18:26:04.395Z",
+      "errors": []
+    },
+    "collector": "WF-01",
+    "target_workflow": "WF-02",
+    "collection_status": "COLLECTED_VALIDATED",
+    "dispatch_status": "MOCK_ONLY",
+    "real_execution_started": false,
+    "note": "Evento coletado e validado. Deduplicacao reservada para o WF-02."
+  },
+  {
+    "schema_version": "1.0",
+    "environment": "LAB",
+    "collection_id": "LAB-COLLECTION-1790879164374",
+    "collection_sequence": 2,
+    "source": "SOC-LAB",
+    "collected_at": "2026-10-01T18:26:04.374Z",
+    "ingested_at": "2026-10-01T18:26:04.374Z",
+    "raw_event": {
+      "sample_case": "EXACT_REPEAT",
+      "source_event_id": "LAB-0001",
+      "occurred_at": "2026-10-01T12:00:00Z",
+      "event_type": "suspicious_connection",
+      "severity": "medium",
+      "entity": {
+        "hostname": "lab-workstation-01",
+        "src_ip": "192.0.2.10",
+        "dst_ip": "198.51.100.20"
+      },
+      "evidence": [
+        {
+          "evidence_id": "LAB-EV-001",
+          "type": "network_connection",
+          "description": "Conexao suspeita identificada no laboratorio.",
+          "src_ip": "192.0.2.10",
+          "dst_ip": "198.51.100.20",
+          "dst_port": 443
+        }
+      ]
+    },
+    "validation": {
+      "status": "VALID",
+      "checked_at": "2026-10-01T18:26:04.395Z",
+      "errors": []
+    },
+    "collector": "WF-01",
+    "target_workflow": "WF-02",
+    "collection_status": "COLLECTED_VALIDATED",
+    "dispatch_status": "MOCK_ONLY",
+    "real_execution_started": false,
+    "note": "Evento coletado e validado. Deduplicacao reservada para o WF-02."
+  },
+  {
+    "schema_version": "1.0",
+    "environment": "LAB",
+    "collection_id": "LAB-COLLECTION-1790879164374",
+    "collection_sequence": 3,
+    "source": "SOC-LAB",
+    "collected_at": "2026-10-01T18:26:04.374Z",
+    "ingested_at": "2026-10-01T18:26:04.374Z",
+    "raw_event": {
+      "sample_case": "MATERIAL_UPDATE",
+      "source_event_id": "LAB-0001",
+      "occurred_at": "2026-10-01T12:00:00Z",
+      "event_type": "suspicious_connection",
+      "severity": "high",
+      "entity": {
+        "hostname": "lab-workstation-01",
+        "src_ip": "192.0.2.10",
+        "dst_ip": "198.51.100.20",
+        "related_hostnames": [
+          "lab-workstation-02"
+        ]
+      },
+      "evidence": [
+        {
+          "evidence_id": "LAB-EV-001",
+          "type": "network_connection",
+          "description": "Conexao suspeita identificada no laboratorio.",
+          "src_ip": "192.0.2.10",
+          "dst_ip": "198.51.100.20",
+          "dst_port": 443
+        },
+        {
+          "evidence_id": "LAB-EV-002",
+          "type": "host_observation",
+          "description": "Novo hostname associado ao evento original.",
+          "hostname": "lab-workstation-02"
+        }
+      ]
+    },
+    "validation": {
+      "status": "VALID",
+      "checked_at": "2026-10-01T18:26:04.395Z",
+      "errors": []
+    },
+    "collector": "WF-01",
+    "target_workflow": "WF-02",
+    "collection_status": "COLLECTED_VALIDATED",
+    "dispatch_status": "MOCK_ONLY",
+    "real_execution_started": false,
+    "note": "Evento coletado e validado. Deduplicacao reservada para o WF-02."
+  }
+]

@@ -1,0 +1,100 @@
+{
+  "name": "WF-00 - SOC Intelligence Orchestrator - LAB",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "wf00-manual-trigger",
+      "name": "00 - Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const agora = new Date().toISOString();\n\nreturn [{\n  json: {\n    schema_version: \"1.0\",\n    request_id: `SOC-${Date.now()}`,\n    execution_id: String($execution.id ?? \"manual\"),\n    created_at: agora,\n    environment: \"LAB\",\n    trigger: {\n      type: \"manual_test\",\n      interval_minutes: 5\n    },\n    action: \"collect_events\",\n    target_workflow: \"WF-01\",\n    source: \"SOC-LAB\",\n    window: {\n      minutes: 5,\n      end: agora\n    },\n    test_event: {\n      event_id: \"LAB-0001\",\n      source: \"SOC-LAB\",\n      timestamp: agora,\n      event_type: \"suspicious_connection\",\n      severity: \"medium\",\n      src_ip: \"192.0.2.10\",\n      dst_ip: \"198.51.100.20\",\n      hostname: \"lab-workstation-01\",\n      description: \"Evento sintetico para teste.\"\n    }\n  }\n}];"
+      },
+      "id": "wf00-prepare-request",
+      "name": "01 - Preparar Solicitacao",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const request = $input.first().json;\nconst erros = [];\n\nconst obrigatorios = [\n  \"schema_version\",\n  \"request_id\",\n  \"environment\",\n  \"trigger\",\n  \"action\",\n  \"target_workflow\",\n  \"source\",\n  \"window\"\n];\n\nfor (const campo of obrigatorios) {\n  if (\n    request[campo] === undefined ||\n    request[campo] === null ||\n    request[campo] === \"\"\n  ) {\n    erros.push(`Campo obrigatorio ausente: ${campo}`);\n  }\n}\n\nif (request.environment !== \"LAB\") {\n  erros.push(\"Somente ambiente LAB permitido.\");\n}\n\nif (request.action !== \"collect_events\") {\n  erros.push(\"Acao nao permitida.\");\n}\n\nif (request.target_workflow !== \"WF-01\") {\n  erros.push(\"Destino invalido.\");\n}\n\nif (\n  !request.window ||\n  !Number.isInteger(request.window.minutes) ||\n  request.window.minutes <= 0\n) {\n  erros.push(\"Janela de coleta invalida.\");\n}\n\nif (erros.length > 0) {\n  throw new Error(erros.join(\" | \"));\n}\n\nreturn [{\n  json: {\n    ...request,\n    validation: {\n      status: \"VALID\",\n      checked_at: new Date().toISOString(),\n      errors: []\n    }\n  }\n}];"
+      },
+      "id": "wf00-validate-contract",
+      "name": "02 - Validar Contrato",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const request = $input.first().json;\n\nif (request.validation?.status !== \"VALID\") {\n  throw new Error(\"Despacho bloqueado.\");\n}\n\nreturn [{\n  json: {\n    request_id: request.request_id,\n    schema_version: request.schema_version,\n    environment: request.environment,\n    orchestrator: \"WF-00\",\n    requested_action: request.action,\n    destination: request.target_workflow,\n    dispatch_status: \"MOCK_ONLY\",\n    real_execution_started: false,\n    received_at: request.created_at,\n    processed_at: new Date().toISOString(),\n    collection_window_minutes: request.window.minutes,\n    test_event: request.test_event,\n    message: \"Contrato validado. Despacho simulado.\"\n  }\n}];"
+      },
+      "id": "wf00-mock-dispatch",
+      "name": "03 - Simular Despacho",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "00 - Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "01 - Preparar Solicitacao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "01 - Preparar Solicitacao": {
+      "main": [
+        [
+          {
+            "node": "02 - Validar Contrato",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 - Validar Contrato": {
+      "main": [
+        [
+          {
+            "node": "03 - Simular Despacho",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Sao_Paulo"
+  },
+  "active": false,
+  "pinData": {},
+  "tags": []
+}

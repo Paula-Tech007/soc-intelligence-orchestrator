@@ -1,0 +1,249 @@
+{
+  "name": "SOC LAB - INTEGRACAO COM INTEGRIDADE - FASE 13.6.2",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "856f20c2-8ddb-45da-bcb7-6d2dbea9f512",
+      "name": "01 - Iniciar Teste de Integracao",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        200,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "\nconst fixture = {\"schema_version\": \"1.0\", \"environment\": \"LAB\", \"origin\": \"WF-04\", \"fixture_type\": \"MOCK_AI_RESPONSE\", \"real_ollama_call\": false, \"ready_for_operational_dispatch\": false, \"results\": [{\"schema_version\": \"1.0\", \"environment\": \"LAB\", \"processor\": \"WF-04\", \"queue_id\": 12, \"investigation_id\": \"8eb57aa6-8249-4b48-bfe9-c00bb0d324d9\", \"source_event_id\": \"LAB-0001\", \"investigation_version\": 1, \"provenance\": {\"database\": \"soc_intelligence\", \"table\": \"investigation_versions\", \"version\": 1, \"content_signature\": \"bc6877a0a006c7371cfe64b6d1da0629eb291ca848aab2487421539992259d6f\"}, \"dispatch_status\": \"MOCK_ONLY\", \"real_execution_started\": false, \"notification_sent\": false, \"status\": \"SKIPPED\", \"reason\": \"Contexto nao elegivel para IA.\", \"ai_executed\": false, \"requires_human_review\": false, \"analysis\": null}, {\"schema_version\": \"1.0\", \"environment\": \"LAB\", \"processor\": \"WF-04\", \"queue_id\": 13, \"investigation_id\": \"8eb57aa6-8249-4b48-bfe9-c00bb0d324d9\", \"source_event_id\": \"LAB-0001\", \"investigation_version\": 2, \"provenance\": {\"database\": \"soc_intelligence\", \"table\": \"investigation_versions\", \"version\": 2, \"content_signature\": \"30a180b436306e413da458a3d2d307a864e3a812cc0460dc689c1ee97dbf7978\"}, \"dispatch_status\": \"MOCK_ONLY\", \"real_execution_started\": false, \"notification_sent\": false, \"status\": \"ANALYSIS_COMPLETED\", \"model\": \"qwen3:4b-instruct\", \"ai_executed\": true, \"requires_human_review\": true, \"analysis\": {\"summary\": \"Evento sintetico LAB-0001 encaminhado para revisao humana.\", \"assessment\": \"Existem duas evidencias registradas. As correlacoes sao informativas e nao comprovam um mesmo incidente.\", \"evidence_ids\": [\"LAB-EV-001\", \"LAB-EV-002\"], \"limitations\": [\"Dados exclusivamente sinteticos.\", \"Sem comprovacao de atividade maliciosa.\"], \"review_actions\": [\"Revisar as evidencias do evento.\"]}, \"note\": \"Resultado assistivo; nao constitui decisao operacional automatica.\"}]};\n\nif (\n  fixture.environment !== 'LAB' ||\n  fixture.fixture_type !== 'MOCK_AI_RESPONSE' ||\n  fixture.real_ollama_call !== false ||\n  fixture.ready_for_operational_dispatch !== false\n) {\n  throw new Error('Fixture WF-04 nao autorizado.');\n}\n\nreturn fixture.results.map(result => ({\n  json: {\n    ...result,\n    fixture_type: fixture.fixture_type,\n    real_ollama_call: false,\n    ready_for_operational_dispatch: false\n  }\n}));\n"
+      },
+      "id": "e7e35c96-9c76-4d4e-8d97-8ce6177569e5",
+      "name": "02 - Carregar Resultados WF-04",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "\nconst input = $input.all();\n\nif (input.length !== 2) {\n  throw new Error('Esperados dois resultados WF-04.');\n}\n\nconst seen = new Set();\n\nfor (const item of input) {\n\n  const r = item.json;\n\n  if (\n    r.schema_version !== '1.0' ||\n    r.environment !== 'LAB' ||\n    r.processor !== 'WF-04' ||\n    r.fixture_type !== 'MOCK_AI_RESPONSE' ||\n    r.dispatch_status !== 'MOCK_ONLY' ||\n    r.real_ollama_call !== false ||\n    r.real_execution_started !== false ||\n    r.notification_sent !== false ||\n    r.ready_for_operational_dispatch !== false\n  ) {\n    throw new Error('Contrato ou ambiente invalido.');\n  }\n\n  if (\n    !Number.isInteger(r.queue_id) ||\n    !r.investigation_id ||\n    r.source_event_id !== 'LAB-0001' ||\n    !Number.isInteger(r.investigation_version)\n  ) {\n    throw new Error('Identidade da investigacao invalida.');\n  }\n\n  if (\n    !r.provenance ||\n    r.provenance.version !== r.investigation_version ||\n    !/^[a-f0-9]{64}$/.test(\n      r.provenance.content_signature || ''\n    )\n  ) {\n    throw new Error('Proveniencia invalida.');\n  }\n\n  if (seen.has(r.queue_id)) {\n    throw new Error('Queue ID duplicado.');\n  }\n\n  seen.add(r.queue_id);\n\n  if (r.investigation_version === 1) {\n\n    if (\n      r.queue_id !== 12 ||\n      r.status !== 'SKIPPED' ||\n      r.ai_executed !== false ||\n      r.requires_human_review !== false ||\n      r.analysis !== null\n    ) {\n      throw new Error('Versao historica invalida.');\n    }\n\n  } else if (r.investigation_version === 2) {\n\n    if (\n      r.queue_id !== 13 ||\n      r.status !== 'ANALYSIS_COMPLETED' ||\n      r.ai_executed !== true ||\n      r.requires_human_review !== true ||\n      !r.analysis\n    ) {\n      throw new Error('Resultado atual invalido.');\n    }\n\n    const a = r.analysis;\n\n    for (const key of ['summary', 'assessment']) {\n      if (\n        typeof a[key] !== 'string' ||\n        !a[key].trim()\n      ) {\n        throw new Error('Texto obrigatorio ausente: ' + key);\n      }\n    }\n\n    for (\n      const key of [\n        'evidence_ids',\n        'limitations',\n        'review_actions'\n      ]\n    ) {\n      if (\n        !Array.isArray(a[key]) ||\n        !a[key].every(v => typeof v === 'string')\n      ) {\n        throw new Error('Lista de analise invalida: ' + key);\n      }\n    }\n\n    const ids = [...new Set(a.evidence_ids)];\n\n    if (\n      ids.length !== 2 ||\n      !ids.includes('LAB-EV-001') ||\n      !ids.includes('LAB-EV-002')\n    ) {\n      throw new Error('Evidencias inesperadas.');\n    }\n\n  } else {\n\n    throw new Error('Versao inesperada neste fixture LAB.');\n\n  }\n\n  r.contract_validation = 'VALID';\n}\n\nreturn input;\n"
+      },
+      "id": "0c746bb0-3a3c-4d30-a1dd-9e2228c588f0",
+      "name": "03 - Validar Resultados WF-04",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "\nreturn $input.all().map(item => {\n\n  const r = item.json;\n\n  if (r.contract_validation !== 'VALID') {\n    throw new Error('Contrato nao validado.');\n  }\n\n  const eligible = (\n    r.investigation_version === 2 &&\n    r.status === 'ANALYSIS_COMPLETED' &&\n    r.requires_human_review === true\n  );\n\n  return {\n    json: {\n      ...r,\n\n      decision: {\n        eligible_for_report: eligible,\n        target_workflow: eligible ? 'WF-05' : null,\n        reason: eligible\n          ? 'Analise MOCK validada para teste do relatorio.'\n          : 'Versao historica ignorada.'\n      },\n\n      integration_mode: 'MOCK_SNAPSHOT',\n\n      ready_for_operational_dispatch: false,\n      real_ollama_call: false,\n      notification_sent: false\n    }\n  };\n});\n"
+      },
+      "id": "f21aa806-506d-4014-906d-61d71a2feac5",
+      "name": "04 - Preparar Destino WF-05",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        950,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "\nconst items = $input.all();\n\nif (items.length !== 2) {\n  throw new Error('Esperados dois resultados WF-04.');\n}\n\nconst results = items.map(item => item.json);\n\nfor (const r of results) {\n\n  if (\n    r.schema_version !== '1.0' ||\n    r.environment !== 'LAB' ||\n    r.processor !== 'WF-04' ||\n    r.contract_validation !== 'VALID' ||\n    r.fixture_type !== 'MOCK_AI_RESPONSE' ||\n    r.integration_mode !== 'MOCK_SNAPSHOT' ||\n    r.dispatch_status !== 'MOCK_ONLY' ||\n    r.real_ollama_call !== false ||\n    r.notification_sent !== false ||\n    r.ready_for_operational_dispatch !== false ||\n    !r.provenance ||\n    r.provenance.version !== r.investigation_version\n  ) {\n    throw new Error('Resultado WF-04 nao autorizado.');\n  }\n}\n\nconst versions = results.map(\n  r => r.investigation_version\n);\n\nif (\n  versions.filter(v => v === 1).length !== 1 ||\n  versions.filter(v => v === 2).length !== 1\n) {\n  throw new Error('Versoes 1 e 2 obrigatorias.');\n}\n\nconst historical = results.find(\n  r => r.investigation_version === 1\n);\n\nconst current = results.find(\n  r => r.investigation_version === 2\n);\n\nif (\n  historical.investigation_id !== current.investigation_id ||\n  historical.source_event_id !== current.source_event_id ||\n  historical.queue_id !== 12 ||\n  current.queue_id !== 13\n) {\n  throw new Error('Identidade da investigacao divergente.');\n}\n\nif (\n  historical.status !== 'SKIPPED' ||\n  historical.ai_executed !== false ||\n  historical.analysis !== null ||\n  historical.decision?.eligible_for_report !== false ||\n  historical.decision?.target_workflow !== null\n) {\n  throw new Error('Historico nao foi bloqueado.');\n}\n\nif (\n  current.status !== 'ANALYSIS_COMPLETED' ||\n  current.requires_human_review !== true ||\n  current.decision?.eligible_for_report !== true ||\n  current.decision?.target_workflow !== 'WF-05'\n) {\n  throw new Error('Versao atual nao autorizada.');\n}\n\n// Nao reconstruir artificialmente a analise.\n// Preservar os resultados recebidos do node anterior.\n\nconst envelope = {\n  schema_version: '1.0',\n  environment: 'LAB',\n  origin: 'WF-04',\n  fixture_type: 'MOCK_AI_RESPONSE',\n  integration_mode: 'MOCK_SNAPSHOT',\n  real_ollama_call: false,\n  ready_for_operational_dispatch: false,\n  results: [historical, current]\n};\n\nreturn [{ json: envelope }];\n"
+      },
+      "id": "ef64eaee-1d90-4202-9e66-1fb64c8dce1f",
+      "name": "05 - Agrupar Contrato Dinamicamente",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "\nconst items = $input.all();\n\nif (items.length !== 1) {\n  throw new Error('Esperado um contrato WF-04.');\n}\n\nconst d = items[0].json;\n\nif (\n  d.schema_version !== '1.0' ||\n  d.environment !== 'LAB' ||\n  d.origin !== 'WF-04' ||\n  d.fixture_type !== 'MOCK_AI_RESPONSE' ||\n  d.real_ollama_call !== false ||\n  d.ready_for_operational_dispatch !== false ||\n  d.integration_mode !== 'MOCK_SNAPSHOT'\n) {\n  throw new Error('Contrato geral nao autorizado.');\n}\n\nif (!Array.isArray(d.results) || d.results.length !== 2) {\n  throw new Error('Quantidade de resultados invalida.');\n}\n\nconst historical = d.results.find(\n  r => r.investigation_version === 1\n);\n\nconst current = d.results.find(\n  r => r.investigation_version === 2\n);\n\nif (!historical || !current) {\n  throw new Error('Versoes 1 e 2 obrigatorias.');\n}\n\nfor (const r of [historical, current]) {\n\n  if (\n    r.environment !== 'LAB' ||\n    r.processor !== 'WF-04' ||\n    r.schema_version !== '1.0' ||\n    r.dispatch_status !== 'MOCK_ONLY' ||\n    r.real_execution_started !== false ||\n    r.notification_sent !== false ||\n    !r.provenance ||\n    r.provenance.version !== r.investigation_version ||\n    !/^[a-f0-9]{64}$/.test(\n      r.provenance.content_signature || ''\n    )\n  ) {\n    throw new Error('Identidade ou proveniencia invalida.');\n  }\n}\n\nif (\n  historical.queue_id !== 12 ||\n  historical.source_event_id !== 'LAB-0001' ||\n  historical.status !== 'SKIPPED' ||\n  historical.ai_executed !== false ||\n  historical.analysis !== null ||\n  historical.requires_human_review !== false\n) {\n  throw new Error('Versao historica nao foi bloqueada.');\n}\n\nif (\n  current.queue_id !== 13 ||\n  current.source_event_id !== 'LAB-0001' ||\n  current.investigation_id !== historical.investigation_id ||\n  current.status !== 'ANALYSIS_COMPLETED' ||\n  current.ai_executed !== true ||\n  current.requires_human_review !== true ||\n  !current.analysis\n) {\n  throw new Error('Versao atual nao autorizada.');\n}\n\nconst a = current.analysis;\n\nif (\n  typeof a.summary !== 'string' ||\n  !a.summary.trim() ||\n  typeof a.assessment !== 'string' ||\n  !a.assessment.trim()\n) {\n  throw new Error('Resumo ou avaliacao ausente.');\n}\n\nfor (const field of [\n  'evidence_ids',\n  'limitations',\n  'review_actions'\n]) {\n\n  if (\n    !Array.isArray(a[field]) ||\n    !a[field].every(\n      v => typeof v === 'string' && v.trim().length > 0\n    )\n  ) {\n    throw new Error('Campo invalido: ' + field);\n  }\n}\n\nconst ids = a.evidence_ids;\n\nif (\n  ids.length !== 2 ||\n  !ids.includes('LAB-EV-001') ||\n  !ids.includes('LAB-EV-002')\n) {\n  throw new Error('Referencias de evidencias invalidas.');\n}\n\nreturn [{\n  json: {\n    ...d,\n    contract_validation: 'VALID',\n    historical_queue_id: historical.queue_id,\n    selected_queue_id: current.queue_id,\n    selected_version: current.investigation_version,\n    selected_signature: current.provenance.content_signature\n  }\n}];\n"
+      },
+      "id": "a8088e8a-962c-486f-99a4-e2d27bd1f248",
+      "name": "06 - Validar Entrada WF-05",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "\n\nconst envelope = $input.first().json;\n\nif (\n  envelope.integrity_transport_validated !== true ||\n  envelope.integrity?.status !==\n    'VALID_FOR_APPROVED_MOCK_SNAPSHOT' ||\n  envelope.integrity?.content_signature !==\n    envelope.selected_signature ||\n  envelope.integrity?.operational_dispatch_allowed !== false\n) {\n  throw new Error(\n    'Geracao HTML bloqueada: integridade nao validada.'\n  );\n}\n\n\nif (\n  envelope.schema_version !== '1.0' ||\n  envelope.environment !== 'LAB' ||\n  envelope.origin !== 'WF-04' ||\n  envelope.integration_mode !== 'MOCK_SNAPSHOT' ||\n  envelope.fixture_type !== 'MOCK_AI_RESPONSE' ||\n  envelope.contract_validation !== 'VALID' ||\n  envelope.real_ollama_call !== false ||\n  envelope.ready_for_operational_dispatch !== false ||\n  envelope.selected_queue_id !== 13 ||\n  envelope.selected_version !== 2 ||\n  envelope.historical_queue_id !== 12 ||\n  !Array.isArray(envelope.results)\n) {\n  throw new Error('Contrato dinamico nao autorizado.');\n}\n\nconst historical = envelope.results.find(\n  r => r.investigation_version === 1\n);\n\nconst current = envelope.results.find(\n  r => r.investigation_version === 2\n);\n\nif (\n  envelope.results.length !== 2 ||\n  !historical ||\n  !current ||\n  historical.status !== 'SKIPPED' ||\n  historical.ai_executed !== false ||\n  historical.analysis !== null ||\n  current.status !== 'ANALYSIS_COMPLETED' ||\n  current.requires_human_review !== true ||\n  current.queue_id !== 13 ||\n  current.provenance?.version !== 2 ||\n  current.provenance?.content_signature !==\n    envelope.selected_signature\n) {\n  throw new Error('Versionamento inconsistente.');\n}\n\nconst analysis = current.analysis;\n\nif (\n  !analysis ||\n  typeof analysis.summary !== 'string' ||\n  !analysis.summary.trim() ||\n  typeof analysis.assessment !== 'string' ||\n  !analysis.assessment.trim()\n) {\n  throw new Error('Analise atual invalida.');\n}\n\nfor (const field of [\n  'evidence_ids',\n  'limitations',\n  'review_actions'\n]) {\n  if (\n    !Array.isArray(analysis[field]) ||\n    !analysis[field].every(\n      value => typeof value === 'string' && !!value.trim()\n    )\n  ) {\n    throw new Error('Lista invalida: ' + field);\n  }\n}\n\nconst evidenceIds = analysis.evidence_ids;\n\nif (\n  evidenceIds.length !== 2 ||\n  new Set(evidenceIds).size !== 2 ||\n  !evidenceIds.includes('LAB-EV-001') ||\n  !evidenceIds.includes('LAB-EV-002')\n) {\n  throw new Error('Referencias de evidencias invalidas.');\n}\n\n// Escapar qualquer texto antes de inseri-lo no HTML.\n\nfunction esc(value) {\n  return String(value)\n    .replace(/&/g, '&amp;')\n    .replace(/</g, '&lt;')\n    .replace(/>/g, '&gt;')\n    .replace(/\"/g, '&quot;')\n    .replace(/'/g, '&#x27;');\n}\n\nfunction list(values) {\n  return values.map(\n    value => '<li>' + esc(value) + '</li>'\n  ).join('\\n');\n}\n\n// Capturar o horario da execucao no n8n.\n// O fuso e definido explicitamente.\n\nconst generatedAt = new Date();\n\nconst timezone = 'America/Sao_Paulo';\n\nconst dateParts = new Intl.DateTimeFormat(\n  'pt-BR',\n  {\n    timeZone: timezone,\n    day: '2-digit',\n    month: '2-digit',\n    year: 'numeric',\n    hour: '2-digit',\n    minute: '2-digit',\n    second: '2-digit',\n    hourCycle: 'h23'\n  }\n).formatToParts(generatedAt);\n\nconst parts = {};\n\nfor (const part of dateParts) {\n  parts[part.type] = part.value;\n}\n\nconst date = [\n  parts.day,\n  parts.month,\n  parts.year\n].join('/');\n\nconst time = [\n  parts.hour,\n  parts.minute,\n  parts.second\n].join(':');\n\nconst dateHtml = `\n<div class=\"date\">\n  <strong>Gerado em:</strong><br>\n  ${esc(date)}<br>\n  <strong>${esc(time)}</strong><br>\n  <small>${esc(timezone)}</small>\n  <hr style=\"border:0;border-top:1px solid #dce4ef;margin:8px 0;\">\n  <strong>Ambiente:</strong> LAB<br>\n  <strong>Origem:</strong> WF-04 / MOCK\n</div>\n`;\n\n// Template visual produzido pelo report_builder.py.\n\nlet html = \"<!DOCTYPE html>\\n<html lang=\\\"pt-BR\\\">\\n<head>\\n<meta charset=\\\"UTF-8\\\">\\n<meta name=\\\"viewport\\\" content=\\\"width=device-width, initial-scale=1\\\">\\n<title>WF-05 | SOC Intelligence Orchestrator</title>\\n\\n<style>\\n* {\\n    box-sizing: border-box;\\n}\\n\\nbody {\\n    margin: 0;\\n    padding: 32px 20px;\\n    background: #f2f5fa;\\n    color: #172c4e;\\n    font-family: \\\"Segoe UI\\\", Arial, sans-serif;\\n    font-size: 14px;\\n    line-height: 1.6;\\n}\\n\\nmain {\\n    max-width: 1120px;\\n    margin: auto;\\n    background: #ffffff;\\n    border: 1px solid #e4eaf2;\\n    border-radius: 12px;\\n    padding: 32px;\\n    box-shadow: 0 6px 28px rgba(25, 48, 83, .05);\\n}\\n\\n.header {\\n    display: flex;\\n    justify-content: space-between;\\n    align-items: center;\\n    gap: 24px;\\n    margin-bottom: 24px;\\n}\\n\\nh1 {\\n    margin: 0;\\n    color: #112a50;\\n    font-size: 27px;\\n    line-height: 1.25;\\n}\\n\\n.subtitle {\\n    margin: 5px 0 0;\\n    color: #61748f;\\n    font-size: 15px;\\n}\\n\\n.date {\\n    padding: 12px 18px;\\n    background: #f3f6fa;\\n    border-radius: 8px;\\n    color: #526680;\\n    white-space: nowrap;\\n}\\n\\n.notice {\\n    display: flex;\\n    gap: 18px;\\n    align-items: center;\\n    background: #edf4ff;\\n    border: 1px solid #c5dcff;\\n    border-radius: 8px;\\n    padding: 16px 20px;\\n    margin-bottom: 26px;\\n}\\n\\n.notice-icon {\\n    display: flex;\\n    justify-content: center;\\n    align-items: center;\\n    flex-shrink: 0;\\n    width: 48px;\\n    height: 48px;\\n    border-radius: 8px;\\n    background: #dceafe;\\n    color: #1265c8;\\n    font-size: 25px;\\n}\\n\\n.notice strong {\\n    color: #174a94;\\n}\\n\\n.notice p {\\n    margin: 4px 0 0;\\n}\\n\\nh2 {\\n    margin: 0 0 12px;\\n    font-size: 18px;\\n    font-weight: 700;\\n    color: #102a50;\\n}\\n\\n.section {\\n    padding: 18px 0;\\n    border-bottom: 1px solid #e1e8f0;\\n}\\n\\n.section:first-of-type {\\n    padding-top: 0;\\n}\\n\\n.section p {\\n    margin: 0 0 0 28px;\\n    color: #40546f;\\n}\\n\\n.meta {\\n    display: grid;\\n    grid-template-columns: repeat(3, minmax(0, 1fr));\\n    gap: 12px;\\n}\\n\\n.meta-card {\\n    min-width: 0;\\n    background: #f5f7fa;\\n    border: 1px solid #e9eef5;\\n    border-radius: 7px;\\n    padding: 14px 17px;\\n}\\n\\n.meta-label {\\n    display: block;\\n    color: #708099;\\n    font-size: 12px;\\n    margin-bottom: 3px;\\n}\\n\\n.meta-value {\\n    display: block;\\n    font-weight: 600;\\n    color: #18345e;\\n    overflow-wrap: anywhere;\\n}\\n\\n.meta-value.regular {\\n    font-weight: 400;\\n}\\n\\n.content {\\n    margin-left: 28px;\\n}\\n\\n.content p {\\n    margin: 0;\\n}\\n\\nul {\\n    margin: 4px 0;\\n    padding-left: 20px;\\n    color: #40546f;\\n}\\n\\n.info {\\n    background: #f5f8fc;\\n    border-radius: 7px;\\n    padding: 14px 18px;\\n}\\n\\n.note {\\n    margin-top: 9px !important;\\n    margin-left: 0 !important;\\n    font-size: 12px;\\n    color: #6a7e97 !important;\\n}\\n\\n.bottom-grid {\\n    display: grid;\\n    grid-template-columns: 1.2fr 0.8fr;\\n    gap: 16px;\\n    margin-top: 22px;\\n}\\n\\n.bottom-card {\\n    min-width: 0;\\n    padding: 20px;\\n    background: #f4f8ff;\\n    border: 1px solid #dbe9fd;\\n    border-radius: 8px;\\n}\\n\\n.bottom-card.version {\\n    background: #f1faf5;\\n    border-color: #d7eee0;\\n}\\n\\n.bottom-card h2 {\\n    font-size: 16px;\\n}\\n\\n.trace {\\n    display: grid;\\n    grid-template-columns: 155px minmax(0, 1fr);\\n    gap: 5px 12px;\\n    font-size: 12px;\\n}\\n\\n.trace strong {\\n    color: #38516e;\\n}\\n\\n.trace span {\\n    overflow-wrap: anywhere;\\n}\\n\\n.bottom-card p {\\n    margin: 0;\\n    font-size: 13px;\\n    color: #40546f;\\n}\\n\\nfooter {\\n    display: flex;\\n    justify-content: space-between;\\n    gap: 16px;\\n    border-top: 1px solid #e1e8f0;\\n    padding-top: 18px;\\n    margin-top: 25px;\\n    font-size: 12px;\\n    color: #728199;\\n}\\n\\n@media (max-width: 760px) {\\n    body {\\n        padding: 10px;\\n    }\\n\\n    main {\\n        padding: 20px;\\n    }\\n\\n    .header,\\n    footer {\\n        flex-direction: column;\\n        align-items: flex-start;\\n    }\\n\\n    .date {\\n        white-space: normal;\\n    }\\n\\n    .meta {\\n        grid-template-columns: repeat(2, minmax(0, 1fr));\\n    }\\n\\n    .bottom-grid {\\n        grid-template-columns: 1fr;\\n    }\\n}\\n\\n@media (max-width: 480px) {\\n    .meta {\\n        grid-template-columns: 1fr;\\n    }\\n\\n    .trace {\\n        grid-template-columns: 1fr;\\n    }\\n}\\n\\n@media print {\\n    body {\\n        background: white;\\n        padding: 0;\\n    }\\n\\n    main {\\n        border: 0;\\n        box-shadow: none;\\n        max-width: none;\\n        padding: 8px;\\n    }\\n\\n    .meta-card,\\n    .bottom-card,\\n    .notice {\\n        break-inside: avoid;\\n    }\\n}\\n</style>\\n</head>\\n\\n<body>\\n<main>\\n\\n<header class=\\\"header\\\">\\n    <div>\\n        <h1>SOC Intelligence Orchestrator</h1>\\n        <p class=\\\"subtitle\\\">\\n            WF-05 | Relat\\u00f3rio de an\\u00e1lise assistiva\\n        </p>\\n    </div>\\n\\n    __WF05_DATETIME__\\n</header>\\n\\n<div class=\\\"notice\\\">\\n    <div class=\\\"notice-icon\\\" aria-hidden=\\\"true\\\">&#9881;</div>\\n\\n    <div>\\n        <strong>LABORATORIO - ANALISE SIMULADA</strong>\\n        <p>\\n            Este documento utiliza uma resposta simulada do WF-04.\\n            O n8n n\\u00e3o executou uma chamada real ao Ollama.\\n            Nenhuma a\\u00e7\\u00e3o operacional foi realizada.\\n        </p>\\n    </div>\\n</div>\\n\\n<section class=\\\"section\\\">\\n    <h2>Identifica\\u00e7\\u00e3o</h2>\\n\\n    <div class=\\\"meta\\\">\\n\\n        <div class=\\\"meta-card\\\">\\n            <span class=\\\"meta-label\\\">Evento</span>\\n            <span class=\\\"meta-value\\\">\\n                LAB-0001\\n            </span>\\n        </div>\\n\\n        <div class=\\\"meta-card\\\">\\n            <span class=\\\"meta-label\\\">Queue ID</span>\\n            <span class=\\\"meta-value\\\">\\n                13\\n            </span>\\n        </div>\\n\\n        <div class=\\\"meta-card\\\">\\n            <span class=\\\"meta-label\\\">Vers\\u00e3o analisada</span>\\n            <span class=\\\"meta-value\\\">\\n                2\\n            </span>\\n        </div>\\n\\n        <div class=\\\"meta-card\\\">\\n            <span class=\\\"meta-label\\\">Investiga\\u00e7\\u00e3o</span>\\n            <span class=\\\"meta-value regular\\\">\\n                8eb57aa6-8249-4b48-bfe9-c00bb0d324d9\\n            </span>\\n        </div>\\n\\n        <div class=\\\"meta-card\\\">\\n            <span class=\\\"meta-label\\\">Status</span>\\n            <span class=\\\"meta-value\\\">\\n                ANALYSIS_COMPLETED\\n            </span>\\n        </div>\\n\\n        <div class=\\\"meta-card\\\">\\n            <span class=\\\"meta-label\\\">Modelo declarado</span>\\n            <span class=\\\"meta-value regular\\\">\\n                qwen3:4b-instruct\\n                (resposta MOCK)\\n            </span>\\n        </div>\\n\\n    </div>\\n</section>\\n\\n<section class=\\\"section\\\">\\n    <h2>Resumo da an\\u00e1lise</h2>\\n    <div class=\\\"content\\\">\\n        <p>__WF05_SUMMARY__</p>\\n    </div>\\n</section>\\n\\n<section class=\\\"section\\\">\\n    <h2>Avalia\\u00e7\\u00e3o assistiva</h2>\\n    <div class=\\\"content\\\">\\n        <p>__WF05_ASSESSMENT__</p>\\n    </div>\\n</section>\\n\\n<section class=\\\"section\\\">\\n    <h2>Refer\\u00eancias das evid\\u00eancias</h2>\\n\\n    <div class=\\\"content info\\\">\\n        <ul>\\n            __WF05_EVIDENCES__\\n        </ul>\\n\\n        <p class=\\\"note\\\">\\n            O contrato WF-04 fornece somente as refer\\u00eancias\\n            das evid\\u00eancias. O conte\\u00fado original dever\\u00e1 ser\\n            consultado durante a revis\\u00e3o humana.\\n        </p>\\n    </div>\\n</section>\\n\\n<section class=\\\"section\\\">\\n    <h2>Limita\\u00e7\\u00f5es da an\\u00e1lise</h2>\\n\\n    <div class=\\\"content\\\">\\n        <ul>\\n            __WF05_LIMITATIONS__\\n        </ul>\\n    </div>\\n</section>\\n\\n<section class=\\\"section\\\">\\n    <h2>Sugest\\u00f5es para revis\\u00e3o humana</h2>\\n\\n    <div class=\\\"content\\\">\\n        <ul>\\n            __WF05_REVIEW_ACTIONS__\\n        </ul>\\n    </div>\\n</section>\\n\\n<div class=\\\"bottom-grid\\\">\\n\\n    <div class=\\\"bottom-card\\\">\\n        <h2>Rastreabilidade</h2>\\n\\n        <div class=\\\"trace\\\">\\n            <strong>Base declarada:</strong>\\n            <span>soc_intelligence</span>\\n\\n            <strong>Tabela declarada:</strong>\\n            <span>investigation_versions</span>\\n\\n            <strong>Vers\\u00e3o:</strong>\\n            <span>2</span>\\n\\n            <strong>Assinatura:</strong>\\n            <span>__WF05_SIGNATURE__</span>\\n        </div>\\n    </div>\\n\\n    <div class=\\\"bottom-card version\\\">\\n        <h2>Controle de vers\\u00f5es</h2>\\n\\n        <p>\\n            A vers\\u00e3o\\n            <strong>1</strong>\\n            (queue 12)\\n            foi classificada como\\n            <strong>SKIPPED</strong>\\n            e n\\u00e3o foi inclu\\u00edda na an\\u00e1lise.\\n        </p>\\n    </div>\\n\\n</div>\\n\\n<footer>\\n    <span>SOC Intelligence Orchestrator | Ambiente LAB</span>\\n\\n    <span>\\n        Revis\\u00e3o humana obrigat\\u00f3ria.\\n        Documento sem finalidade operacional.\\n    </span>\\n</footer>\\n\\n</main>\\n</body>\\n</html>\\n\";\n\nfunction replaceMarker(name, value) {\n\n  const marker = '__WF05_' + name + '__';\n\n  if (!html.includes(marker)) {\n    throw new Error(\n      'Marcador do template ausente: ' + name\n    );\n  }\n\n  html = html.replace(marker, value);\n}\n\nreplaceMarker('SUMMARY', esc(analysis.summary));\n\nreplaceMarker('ASSESSMENT', esc(analysis.assessment));\n\nreplaceMarker('EVIDENCES', list(evidenceIds));\n\nreplaceMarker('LIMITATIONS', list(analysis.limitations));\n\nreplaceMarker('REVIEW_ACTIONS', list(analysis.review_actions));\n\nreplaceMarker(\n  'SIGNATURE',\n  esc(envelope.selected_signature)\n);\n\nreplaceMarker('DATETIME', dateHtml);\n\nif (\n  html.includes('__WF05_') ||\n  !html.includes('LABORATORIO - ANALISE SIMULADA') ||\n  !html.includes(envelope.selected_signature)\n) {\n  throw new Error('HTML dinamico incompleto.');\n}\n\nreturn [{\n  json: {\n    schema_version: '1.0',\n    environment: 'LAB',\n    processor: 'WF-05',\n    integration_mode: 'MOCK_SNAPSHOT',\n\n    report_status: 'HTML_PREPARED',\n\n    source_event_id: current.source_event_id,\n    investigation_id: current.investigation_id,\n    queue_id: current.queue_id,\n    investigation_version: current.investigation_version,\n\n    historical_queue_id: historical.queue_id,\n\n    content_signature:\n      current.provenance.content_signature,\n\n    generated_at: generatedAt.toISOString(),\n    report_timezone: timezone,\n\n    template_source: 'PYTHON_APPROVED_LAYOUT',\n    html_is_dynamic: true,\n    integrity: envelope.integrity,\n    integrity_transport_validated: true,\n    html: html,\n\n    real_ollama_call: false,\n    ready_for_operational_dispatch: false,\n    notification_sent: false,\n\n    human_review_required: true,\n    human_review_completed: false\n  }\n}];\n"
+      },
+      "id": "8805d136-f4cf-40e8-9365-7748b8bf0938",
+      "name": "07 - Gerar HTML Dinamico",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2075,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "\nconst r = $input.first().json;\n\nif (\n  r.processor !== 'WF-05' ||\n  r.environment !== 'LAB' ||\n  r.report_status !== 'HTML_PREPARED' ||\n  r.html_is_dynamic !== true ||\n  r.integrity_transport_validated !== true ||\n  r.integrity?.status !==\n    'VALID_FOR_APPROVED_MOCK_SNAPSHOT' ||\n  r.integrity?.content_signature !== r.content_signature ||\n  r.integrity?.operational_dispatch_allowed !== false ||\n  r.integration_mode !== 'MOCK_SNAPSHOT' ||\n  r.human_review_required !== true ||\n  r.human_review_completed !== false ||\n  r.notification_sent !== false ||\n  r.ready_for_operational_dispatch !== false ||\n  typeof r.html !== 'string' ||\n  !r.html.includes(r.content_signature)\n) {\n  throw new Error('Relatorio nao autorizado.');\n}\n\nreturn [{\n  json: {\n    ...r,\n\n    report_status: 'AWAITING_HUMAN_REVIEW',\n\n    decision: {\n      eligible_for_human_review: true,\n      review_mode: 'MOCK_ONLY',\n      automatically_approved: false,\n      operational_dispatch_allowed: false,\n      reason: 'HTML dinamico preparado para revisao.'\n    }\n  }\n}];\n"
+      },
+      "id": "b7145ce4-b88a-4e48-938d-71b1bd892fce",
+      "name": "08 - Preparar Revisao Humana",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2325,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "\nconst items = $input.all();\n\nif (items.length !== 1) {\n  throw new Error('Esperado um contrato WF-04.');\n}\n\nconst envelope = items[0].json;\n\nif (\n  envelope.environment !== 'LAB' ||\n  envelope.origin !== 'WF-04' ||\n  envelope.contract_validation !== 'VALID' ||\n  envelope.integration_mode !== 'MOCK_SNAPSHOT' ||\n  envelope.selected_version !== 2 ||\n  envelope.selected_queue_id !== 13 ||\n  envelope.ready_for_operational_dispatch !== false\n) {\n  throw new Error('Contrato nao autorizado.');\n}\n\n// Referencia aprovada previamente pelo Python.\n// Nao equivale a uma nova verificacao criptografica.\n\nconst reference = {\"identity\": {\"environment\": \"LAB\", \"investigation_id\": \"8eb57aa6-8249-4b48-bfe9-c00bb0d324d9\", \"source_event_id\": \"LAB-0001\", \"queue_id\": 13, \"investigation_version\": 2, \"content_signature\": \"30a180b436306e413da458a3d2d307a864e3a812cc0460dc689c1ee97dbf7978\", \"model\": \"qwen3:4b-instruct\", \"execution_mode\": \"MOCK_AI_RESPONSE\"}, \"analysis\": {\"summary\": \"Evento sintetico LAB-0001 encaminhado para revisao humana.\", \"assessment\": \"Existem duas evidencias registradas. As correlacoes sao informativas e nao comprovam um mesmo incidente.\", \"evidence_ids\": [\"LAB-EV-001\", \"LAB-EV-002\"], \"limitations\": [\"Dados exclusivamente sinteticos.\", \"Sem comprovacao de atividade maliciosa.\"], \"review_actions\": [\"Revisar as evidencias do evento.\"]}, \"content_signature\": \"30a180b436306e413da458a3d2d307a864e3a812cc0460dc689c1ee97dbf7978\", \"analysis_signature\": \"098ccd0bb878705dd1dfd71ee628fce18014266fd0134b87aa973e4fd026556f\", \"result_key\": \"a188c64efc9b917833716e6fd61bde59f95817ca7abe817006a4484dd79dce29\"};\n\nreturn [{\n  json: {\n    ...envelope,\n    integrity_reference: reference,\n    integrity_transport_validated: false\n  }\n}];\n"
+      },
+      "id": "db05043b-db6f-4c1b-a777-8712e1ce321b",
+      "name": "06A - Anexar Referencia de Integridade",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1575,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "\nconst items = $input.all();\n\nif (items.length !== 1) {\n  throw new Error('Quantidade de contratos invalida.');\n}\n\nconst envelope = items[0].json;\nconst ref = envelope.integrity_reference;\n\nif (\n  !ref ||\n  envelope.environment !== 'LAB' ||\n  envelope.integration_mode !== 'MOCK_SNAPSHOT' ||\n  envelope.integrity_transport_validated !== false ||\n  !Array.isArray(envelope.results) ||\n  envelope.results.length !== 2\n) {\n  throw new Error('Referencia de integridade invalida.');\n}\n\nconst historical = envelope.results.find(\n  r => r.investigation_version === 1\n);\n\nconst current = envelope.results.find(\n  r => r.investigation_version === 2\n);\n\nif (\n  !historical ||\n  !current ||\n  historical.status !== 'SKIPPED' ||\n  historical.ai_executed !== false ||\n  historical.analysis !== null ||\n  current.status !== 'ANALYSIS_COMPLETED' ||\n  current.requires_human_review !== true ||\n  current.queue_id !== 13\n) {\n  throw new Error('Controle de versoes invalido.');\n}\n\n// Normalizacao deterministica para comparar objetos JSON.\n\nfunction normalize(value) {\n\n  if (Array.isArray(value)) {\n    return value.map(normalize);\n  }\n\n  if (\n    value !== null &&\n    typeof value === 'object'\n  ) {\n\n    const result = {};\n\n    for (const key of Object.keys(value).sort()) {\n      result[key] = normalize(value[key]);\n    }\n\n    return result;\n  }\n\n  return value;\n}\n\nfunction same(a, b) {\n  return JSON.stringify(normalize(a)) ===\n         JSON.stringify(normalize(b));\n}\n\n// Conferir a identidade vinculada ao registro.\n\nconst actualIdentity = {\n  environment: current.environment,\n  investigation_id: current.investigation_id,\n  source_event_id: current.source_event_id,\n  queue_id: current.queue_id,\n  investigation_version: current.investigation_version,\n  content_signature:\n    current.provenance?.content_signature,\n  model: current.model,\n  execution_mode: 'MOCK_AI_RESPONSE'\n};\n\nif (!same(actualIdentity, ref.identity)) {\n  throw new Error(\n    'INTEGRITY_CONFLICT: identidade divergente.'\n  );\n}\n\n// Conferir a analise com o snapshot aprovado.\n\nif (!same(current.analysis, ref.analysis)) {\n  throw new Error(\n    'INTEGRITY_CONFLICT: analise divergente.'\n  );\n}\n\n// Conferir a correspondencia dos identificadores\n// exportados e os respectivos campos de transporte.\n\nconst hashPattern = /^[a-f0-9]{64}$/;\n\nfor (const field of [\n  'content_signature',\n  'analysis_signature',\n  'result_key'\n]) {\n  if (!hashPattern.test(ref[field] || '')) {\n    throw new Error(\n      'Formato de assinatura invalido: ' + field\n    );\n  }\n}\n\nif (\n  ref.content_signature !==\n    current.provenance.content_signature ||\n  ref.content_signature !==\n    envelope.selected_signature ||\n  current.investigation_version !==\n    envelope.selected_version ||\n  current.queue_id !== envelope.selected_queue_id\n) {\n  throw new Error(\n    'INTEGRITY_CONFLICT: proveniencia divergente.'\n  );\n}\n\n// A integridade foi comparada com o fixture aprovado.\n// SHA-256 nao foi recalculado neste Code Node.\n\nconst {\n  integrity_reference,\n  ...cleanEnvelope\n} = envelope;\n\nreturn [{\n  json: {\n    ...cleanEnvelope,\n\n    integrity_transport_validated: true,\n\n    integrity: {\n      schema_version: '1.0',\n      mode: 'LAB_MOCK',\n      status: 'VALID_FOR_APPROVED_MOCK_SNAPSHOT',\n\n      content_signature: ref.content_signature,\n      analysis_signature: ref.analysis_signature,\n      result_key: ref.result_key,\n\n      verification_method: 'APPROVED_FIXTURE_COMPARISON',\n      verified_against_database: false,\n      operational_dispatch_allowed: false\n    }\n  }\n}];\n"
+      },
+      "id": "ebcf6974-4fda-4b8e-a57b-3e3dfe74ecf7",
+      "name": "06B - Validar Integridade de Transporte",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1825,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "01 - Iniciar Teste de Integracao": {
+      "main": [
+        [
+          {
+            "node": "02 - Carregar Resultados WF-04",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 - Carregar Resultados WF-04": {
+      "main": [
+        [
+          {
+            "node": "03 - Validar Resultados WF-04",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "03 - Validar Resultados WF-04": {
+      "main": [
+        [
+          {
+            "node": "04 - Preparar Destino WF-05",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "04 - Preparar Destino WF-05": {
+      "main": [
+        [
+          {
+            "node": "05 - Agrupar Contrato Dinamicamente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "05 - Agrupar Contrato Dinamicamente": {
+      "main": [
+        [
+          {
+            "node": "06 - Validar Entrada WF-05",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "06 - Validar Entrada WF-05": {
+      "main": [
+        [
+          {
+            "node": "06A - Anexar Referencia de Integridade",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "07 - Gerar HTML Dinamico": {
+      "main": [
+        [
+          {
+            "node": "08 - Preparar Revisao Humana",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "06A - Anexar Referencia de Integridade": {
+      "main": [
+        [
+          {
+            "node": "06B - Validar Integridade de Transporte",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "06B - Validar Integridade de Transporte": {
+      "main": [
+        [
+          {
+            "node": "07 - Gerar HTML Dinamico",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false,
+  "pinData": {},
+  "tags": []
+}
