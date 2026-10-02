@@ -751,7 +751,7 @@ O projeto foi estruturado para evoluir de um laboratório controlado para uma ar
 | **06 — Reporting** | HTML estruturado e revisão humana. | ✅ Concluído no LAB |
 | **07 — E2E Integration** | Workflow integrado com 20 nós. | LAB/MOCK homologado; integracao dinamica pendente |
 | **08 — Runtime Database** | Integrar PostgreSQL dinamicamente ao n8n. | LAB Python dinamico homologado; integracao ao n8n corporativo pendente |
-| **09 — Runtime AI** | Conectar Ollama ao fluxo E2E. | Runtime Python local homologado ate WF-04; integridade/HTML offline; E2E remoto pendente |
+| **09 — Runtime AI** | Conectar Ollama ao fluxo E2E. | Runtime Python ate HTML real homologado localmente; E2E n8n remoto pendente |
 | **10 - Observability** | Telemetria sanitizada e rastreabilidade em memoria. | Homologado offline (Etapas 14 e 16) |
 | **11 — Portfolio Release** | Demonstração reproduzível e evidências visuais. | ⬜ Em evolução |
 | **12 - MOCK Reporting Integration** | Pipeline observado integrado ao WF-05. | Etapa 15 homologada |
@@ -832,9 +832,17 @@ A regressao real e opcional:
 Doze testes offline adicionais preparados para o CI:
 22 suites e 204 testes previstos.
 
-A integridade em memoria e o relatorio HTML Runtime AI
-foram validados offline. A homologacao do HTML com resposta
-real do Ollama e o E2E corporativo continuam pendentes.
+A integridade em memoria e o HTML foram homologados
+tambem com uma resposta real do Ollama local, reutilizando
+a mesma chamada ao WF-04.
+
+O novo compositor e `src/context/local_runtime_ai_report.py`.
+A regressao real produz HTML sintetico na pasta temporaria
+do Windows e preserva a revisao humana obrigatoria.
+
+CI remoto publicado: 204/204 (run 37041432173).
+Nova suite offline preparada: 23 padroes, 210 testes previstos.
+O E2E corporativo continua pendente de integracao autorizada.
 
 ### Documentos de governanca
 
@@ -842,9 +850,11 @@ real do Ollama e o E2E corporativo continuam pendentes.
 - [Project Status Checklist](docs/PROJECT_STATUS_CHECKLIST.md): estado das entregas e pendencias.
 - [Test Strategy](docs/TEST_STRATEGY.md): cobertura e classificacao dos testes.
 
-**Baseline funcional:** `f2feb8e`.
+**Baseline funcional publicada:** `1e0fb62`.
 
-GitHub Actions: **19 suites e 186/186 testes aprovados remotamente**. Integracao dinamica ainda pendente nas fases 08 e 09.
+GitHub Actions: **22 suites e 204/204 testes aprovados remotamente**
+(execucao `37041432173`). Ampliacao para 210 testes
+preparada na branch de integracao HTML. E2E n8n remoto pendente.
 
 ---
 

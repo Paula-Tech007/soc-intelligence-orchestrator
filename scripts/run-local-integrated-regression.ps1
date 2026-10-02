@@ -37,7 +37,7 @@ try {
 
     if (
         $LASTEXITCODE -ne 0 -or
-        $branch -notin @("feat/automated-integration-regression", "feat/runtime-database-local-consumer", "feat/runtime-ai-local-integration", "main")
+        $branch -notin @("feat/automated-integration-regression", "feat/runtime-database-local-consumer", "feat/runtime-ai-local-integration", "feat/runtime-ai-report-e2e-local", "main")
     ) {
         throw "Branch da Etapa 12 nao esta ativa."
     }

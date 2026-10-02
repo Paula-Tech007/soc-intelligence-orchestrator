@@ -2,9 +2,10 @@
 
 ## Baseline vigente
 
-Commit: `f2feb8e`.
-GitHub Actions: execucao `37032159353`, SUCCESS.
-Python 3.12: **19 suites e 186/186 testes aprovados remotamente**.
+Commit funcional publicado: `1e0fb62`.
+GitHub Actions: execucao `37041432173`, SUCCESS.
+Python 3.12: **22 suites e 204/204 testes aprovados remotamente**.
+Nova integracao local HTML: homologada; CI de 210 testes pendente.
 
 Historico:
 - Etapa 17: 14 suites, 138 testes.
@@ -13,10 +14,10 @@ Historico:
 
 ## Inventario Python
 
-- Arquivos test_*.py: 41.
-- Arquivos contemplados pelo CI: 20.
+- Arquivos test_*.py apos nova entrega: 45.
+- Arquivos contemplados pelos padroes CI: 24.
 - Arquivos fora dos padroes do CI: 21.
-- Padroes do CI: 19 (bridge contempla dois arquivos).
+- Padroes de CI preparados: 23 (bridge contempla dois arquivos).
 - Testes procedurais podem exigir execucao separada.
 
 ## Suites presentes no GitHub Actions
@@ -44,6 +45,7 @@ Historico:
 | test_local_mock_composer.py |
 | test_local_runtime_ai.py |
 | test_runtime_ai_artifacts.py |
+| test_local_runtime_ai_report.py |
 | test_local_runtime_composer.py |
 
 ## Etapa 18 - Contratos genericos LAB/MOCK
@@ -99,17 +101,22 @@ utiliza modelo MOCK, sem Ollama real.
 
 - Nova suite: test_local_runtime_ai.py (6 testes offline).
 - Nova suite: test_runtime_ai_artifacts.py (6 testes offline).
-- Total previsto no CI ampliado: 22 padroes, 204 testes.
+- CI remoto confirmado: 22 padroes, 204/204 testes.
+- Proxima ampliacao: 23 padroes, 210 testes.
 - Teste real opcional: local_runtime_ai_regression.py.
 - Dependencias reais: PostgreSQL LAB, FastAPI e Ollama local.
 - Runner: run-local-integrated-regression.ps1 -IncludeRuntimeAI.
 - Homologacao real local: SUCCESS.
-- Aprovacao remota ampliada: pendente.
+- CI remoto de 204 testes: aprovado (37041432173).
+- Nova ampliacao para 210 testes: pendente.
 
 A chamada real nao integra o CI offline. O SHA-256
 foi calculado sobre a analise, sem verificacao persistente.
 Integridade em memoria e HTML Runtime AI aprovados offline.
-A homologacao do HTML com resposta real continua pendente.
+O HTML com resposta real foi homologado localmente
+pelo runner DPAPI, sem segunda chamada ao Ollama.
+O relatorio permanece sem revisao humana concluida,
+persistencia analitica ou despacho operacional.
 
 ## Oito candidatos a testes offline adicionais
 

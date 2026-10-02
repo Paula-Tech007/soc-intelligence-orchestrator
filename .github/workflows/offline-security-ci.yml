@@ -49,6 +49,7 @@ jobs:
           local_tests = (
               "local_integrated_regression.py",
               "local_runtime_regression.py",
+              "local_runtime_ai_regression.py",
           )
 
           assert all(
@@ -211,4 +212,11 @@ jobs:
           python -m unittest discover \
             -s tests \
             -p "test_runtime_ai_artifacts.py" \
+            -v
+
+      - name: Run complete Runtime AI HTML offline tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_local_runtime_ai_report.py" \
             -v

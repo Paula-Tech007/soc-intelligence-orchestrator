@@ -3,18 +3,33 @@
 import unittest
 
 from src.ai_engine.engine import MODEL_NAME
-from src.context.local_runtime_ai import run_local_runtime_ai
+from src.context.local_runtime_ai_report import run_local_runtime_ai_report
 
 
 class LocalRuntimeAIRegression(unittest.TestCase):
 
     def test_authenticated_context_with_real_ollama(self):
-        result = run_local_runtime_ai(
+        delivery = run_local_runtime_ai_report(
             12,
             13,
             allow_model_execution=True,
         )
 
+        result = delivery["runtime"]
+
+        self.assertEqual(delivery["execution_mode"], "LOCAL_OLLAMA")
+        self.assertEqual(
+            delivery["integrity_status"],
+            "VERIFIED_IN_MEMORY",
+        )
+        self.assertEqual(
+            delivery["report_status"],
+            "AWAITING_HUMAN_REVIEW",
+        )
+        self.assertIs(delivery["human_review_required"], True)
+        self.assertIs(delivery["operational_dispatch_allowed"], False)
+        self.assertIs(delivery["notification_sent"], False)
+        self.assertIn("OLLAMA LOCAL - ANALISE REAL", delivery["html"])
         self.assertEqual(result["pipeline_status"], "COMPLETED")
         self.assertEqual(result["execution_mode"], "LOCAL_OLLAMA")
         self.assertEqual(result["context_transport"], "AUTHENTICATED_LOCAL_HTTP")
@@ -42,6 +57,19 @@ class LocalRuntimeAIRegression(unittest.TestCase):
         print("[OK] Analise assinada em memoria.")
         print("[OK] Sem despacho ou notificacoes.")
 
+
+        # Export the synthetic LAB report without another Ollama call.
+        import tempfile
+
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            prefix="soc-phase09-runtime-ai-",
+            suffix=".html",
+            delete=False,
+        ) as report:
+            report.write(delivery["html"])
+            print("[OK] Real Runtime AI HTML:", report.name)
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
