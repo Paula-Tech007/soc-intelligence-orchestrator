@@ -805,8 +805,8 @@ O runner recupera temporariamente o token DPAPI e executa
 
 A nova suite `test_local_runtime_composer.py` acrescenta
 seis testes offline, elevando o CI planejado para
-**20 suites e 192 testes**. A aprovacao remota desta
-ampliacao ainda depende da publicacao.
+**20 suites e 192 testes**. A homologacao remota desta
+ampliacao foi confirmada: 192/192 testes (run 37037435586).
 
 O n8n corporativo utiliza interface web e permanece
 sem integracao direta homologada com a FastAPI local.

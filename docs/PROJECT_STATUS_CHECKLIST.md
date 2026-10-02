@@ -29,7 +29,7 @@ Referencia: Etapa 19, commit `f2feb8e`.
 
 Inventarios antigos permanecem no historico Git.
 
-Incremento local da Fase 08 em branch: tres arquivos novos. Total previsto apos publicacao: 129 arquivos.
+Incremento local da Fase 08 em branch: tres arquivos novos. Total publicado: 129 arquivos (commit 4af8325).
 
 ## Checklist de componentes
 
@@ -136,7 +136,7 @@ A continuidade segue as fases originais 08, 09 e 11.
 - [x] Validar cache e idempotencia no LAB.
 - [x] Registrar teste dinamico reproduzivel.
 - [x] Preparar runner DPAPI e ampliacao do CI.
-- [ ] Confirmar GitHub Actions remoto com 192/192 testes.
+- [x] Confirmar GitHub Actions remoto com 192/192 testes (run 37037435586, SUCCESS).
 - [ ] Definir conectividade aprovada para n8n corporativo.
 - [ ] Homologar integracao dinamica no workflow E2E n8n.
 

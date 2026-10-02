@@ -80,8 +80,8 @@ validacao contra PostgreSQL ou execucao real de Ollama.
 - Homologacao com FastAPI/PostgreSQL real: aprovada no LAB.
 - Teste protegido: tests/local_runtime_regression.py.
 - Runner: scripts/run-local-integrated-regression.ps1.
-- Proxima meta CI: 20 suites e 192 testes.
-- Aprovacao remota dessa ampliacao: pendente.
+- CI homologado: 20 suites e 192/192 testes.
+- CI remoto: SUCCESS, execucao 37037435586.
 
 Inventario previsto apos publicacao:
 - Arquivos Python test_*.py: 42.
