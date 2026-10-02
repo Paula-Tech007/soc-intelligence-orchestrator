@@ -179,3 +179,9 @@ jobs:
             -s tests \
             -p "test_generic_memory_trace_registry.py" \
             -v
+      - name: Run unified local MOCK composer tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_local_mock_composer.py" \
+            -v

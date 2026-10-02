@@ -888,3 +888,23 @@ Desenvolvimento de soluções envolvendo automação de processos, orquestraçã
 **© Paula Sabino**
 
 </div>
+
+
+## Etapa 19 - Pipeline Python integrado LAB/MOCK
+
+O modulo `src/context/local_mock_composer.py` executa uma
+investigacao sintetica em uma unica chamada, reutilizando
+Decision Gate, revisao MOCK, integridade SHA-256, WF-05
+e rastreabilidade temporaria em memoria.
+
+Demonstracao local (PowerShell):
+
+```powershell
+.\.venv\Scripts\python.exe scripts/demo-local-mock.py
+```
+
+A demonstracao grava o HTML WF-05 na pasta temporaria e
+verifica repeticao idempotente com cache. Nao consulta
+PostgreSQL, nao executa Ollama real e nao realiza despacho
+operacional. O campo de origem da fixture indica um snapshot
+exportado, nao uma consulta de banco nesta execucao.

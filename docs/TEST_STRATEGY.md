@@ -5,7 +5,8 @@
 Commit: e71d81c.
 CI da baseline anterior: 14 suites, 138 testes offline.
 Etapa 18: 18 suites e 180 testes aprovados localmente.
-A validacao remota do CI ampliado permanece pendente.
+Etapa 18: CI remoto aprovado, 180/180 testes.
+Etapa 19: ampliacao proposta para 19 suites e 186 testes.
 
 ## Inventario Python
 
@@ -39,6 +40,7 @@ descobertos pelo unittest discover.
 | test_generic_integrated_mock_report.py |
 | test_generic_memory_traceability.py |
 | test_generic_memory_trace_registry.py |
+| test_local_mock_composer.py |
 
 ## Etapa 18 - Contratos genericos LAB/MOCK
 
@@ -58,6 +60,17 @@ separadamente, com sete verificacoes aprovadas.
 O novo percurso exige contexto e evidencias confiaveis,
 integridade SHA-256 e revisao humana. Nao constitui
 validacao contra PostgreSQL ou execucao real de Ollama.
+
+## Etapa 19 - Executor Python LAB/MOCK
+
+- Nova suite: test_local_mock_composer.py (6 testes).
+- Total previsto: 19 suites e 186 testes unittest.
+- Demonstrador: scripts/demo-local-mock.py.
+- Saida: HTML WF-05 na pasta temporaria.
+- Cache e registro temporario validados na repeticao.
+- Contextos provenientes de fixture sintetica exportada.
+- Sem nova consulta PostgreSQL ou chamada Ollama real.
+- Confirmacao do CI remoto pendente de publicacao.
 
 ## Oito candidatos a testes offline adicionais
 

@@ -97,6 +97,19 @@ e sua regressao offline.
 A proxima atividade e a Etapa 19, consolidacao da
 integracao Python local.
 
+## Etapa 19 - Integracao Python local
+
+- [x] Executor unico LAB/MOCK implementado.
+- [x] Versao historica e vigente processadas na mesma chamada.
+- [x] Relatorio HTML e rastreabilidade produzidos.
+- [x] Cache e registro temporario idempotente demonstrados.
+- [x] Seis testes novos aprovados localmente.
+- [x] Demonstrador executavel validado.
+- [x] Nova suite incluida na configuracao de CI.
+- [ ] Regressao consolidada: 186 testes.
+- [ ] Publicacao direta na main.
+- [ ] Confirmacao do GitHub Actions remoto.
+
 ## Proximos marcos propostos
 
 - Etapa 19: consolidacao da integracao Python local.
