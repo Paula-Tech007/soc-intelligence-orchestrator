@@ -74,8 +74,28 @@ A Etapa 18 acrescenta quatro arquivos de teste.
 - [x] 18.6B Registro temporario generico.
 - [x] 18.7 Homologacao local: 180 testes e 7 checks.
 - [x] 18.8 Inclusao das quatro suites na configuracao de CI.
-- [ ] 18.9 Publicacao direta na main.
-- [ ] 18.10 Confirmacao do CI remoto ampliado.
+- [x] 18.9 Publicacao direta na main.
+- [x] 18.10 Confirmacao do CI remoto ampliado.
+
+## Fechamento da Etapa 18
+
+- Publicacao funcional: 88f4968ee3fec824e4cf80a48c99e8490e21ed3e.
+- Branch: main, atualizada por fast-forward.
+- GitHub Actions: Offline Security CI, execucao 6.
+- Resultado remoto: SUCCESS.
+- Python: 3.12.
+- Suites offline: 18.
+- Testes unittest aprovados: 180 de 180.
+- Testes genericos adicionados: 42.
+- Sete verificacoes procedurais adicionais aprovadas localmente.
+- Escopo: LAB/MOCK, investigacoes sinteticas e revisao humana.
+- Sem homologacao de E2E remoto com PostgreSQL ou Ollama real.
+
+A Etapa 18 fica concluida quanto aos contratos genericos
+e sua regressao offline.
+
+A proxima atividade e a Etapa 19, consolidacao da
+integracao Python local.
 
 ## Proximos marcos propostos
 
