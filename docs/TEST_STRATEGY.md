@@ -42,6 +42,8 @@ Historico:
 | test_generic_memory_traceability.py |
 | test_generic_memory_trace_registry.py |
 | test_local_mock_composer.py |
+| test_local_runtime_ai.py |
+| test_runtime_ai_artifacts.py |
 | test_local_runtime_composer.py |
 
 ## Etapa 18 - Contratos genericos LAB/MOCK
@@ -92,6 +94,22 @@ Inventario previsto apos publicacao:
 Esta homologacao comprova consulta dinamica do contexto.
 A integridade da analise permanece em memoria e o WF-04
 utiliza modelo MOCK, sem Ollama real.
+
+## Fase 09 - Runtime AI local
+
+- Nova suite: test_local_runtime_ai.py (6 testes offline).
+- Nova suite: test_runtime_ai_artifacts.py (6 testes offline).
+- Total previsto no CI ampliado: 22 padroes, 204 testes.
+- Teste real opcional: local_runtime_ai_regression.py.
+- Dependencias reais: PostgreSQL LAB, FastAPI e Ollama local.
+- Runner: run-local-integrated-regression.ps1 -IncludeRuntimeAI.
+- Homologacao real local: SUCCESS.
+- Aprovacao remota ampliada: pendente.
+
+A chamada real nao integra o CI offline. O SHA-256
+foi calculado sobre a analise, sem verificacao persistente.
+Integridade em memoria e HTML Runtime AI aprovados offline.
+A homologacao do HTML com resposta real continua pendente.
 
 ## Oito candidatos a testes offline adicionais
 

@@ -7,7 +7,9 @@
 # A FastAPI deve ser iniciada separadamente.
 # Nenhuma credencial e escrita no repositorio.
 
-$ErrorActionPreference = "Stop"
+param([switch]$IncludeRuntimeAI)
+
+
 
 $root = Split-Path -Parent $PSScriptRoot
 
@@ -35,7 +37,7 @@ try {
 
     if (
         $LASTEXITCODE -ne 0 -or
-        $branch -notin @("feat/automated-integration-regression", "feat/runtime-database-local-consumer", "main")
+        $branch -notin @("feat/automated-integration-regression", "feat/runtime-database-local-consumer", "feat/runtime-ai-local-integration", "main")
     ) {
         throw "Branch da Etapa 12 nao esta ativa."
     }
@@ -120,6 +122,18 @@ try {
     }
 
     Write-Host "[OK] Regressao dinamica aprovada."
+
+    if ($IncludeRuntimeAI) {
+        Write-Host "`n=== 3C. RUNTIME AI - OLLAMA REAL ===" -ForegroundColor Cyan
+
+        & $python -m unittest discover -s tests -p "local_runtime_ai_regression.py" -v
+
+        if ($LASTEXITCODE -ne 0) {
+            throw "Homologacao Runtime AI reprovada."
+        }
+
+        Write-Host "[OK] Runtime AI local homologado." -ForegroundColor Green
+    }
 
     Write-Host "`n[OK] REGRESSAO INTEGRADA APROVADA!" `
         -ForegroundColor Green

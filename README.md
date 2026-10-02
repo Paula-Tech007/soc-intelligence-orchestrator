@@ -751,7 +751,7 @@ O projeto foi estruturado para evoluir de um laboratório controlado para uma ar
 | **06 — Reporting** | HTML estruturado e revisão humana. | ✅ Concluído no LAB |
 | **07 — E2E Integration** | Workflow integrado com 20 nós. | LAB/MOCK homologado; integracao dinamica pendente |
 | **08 — Runtime Database** | Integrar PostgreSQL dinamicamente ao n8n. | LAB Python dinamico homologado; integracao ao n8n corporativo pendente |
-| **09 — Runtime AI** | Conectar Ollama ao fluxo E2E. | ⬜ Planejado |
+| **09 — Runtime AI** | Conectar Ollama ao fluxo E2E. | Runtime Python local homologado ate WF-04; integridade/HTML offline; E2E remoto pendente |
 | **10 - Observability** | Telemetria sanitizada e rastreabilidade em memoria. | Homologado offline (Etapas 14 e 16) |
 | **11 — Portfolio Release** | Demonstração reproduzível e evidências visuais. | ⬜ Em evolução |
 | **12 - MOCK Reporting Integration** | Pipeline observado integrado ao WF-05. | Etapa 15 homologada |
@@ -811,6 +811,30 @@ ampliacao foi confirmada: 192/192 testes (run 37037435586).
 O n8n corporativo utiliza interface web e permanece
 sem integracao direta homologada com a FastAPI local.
 Nao expor a ponte localhost publicamente.
+
+### Fase 09 - Runtime AI local
+
+O adaptador `src/context/local_runtime_ai.py` reutiliza
+a consulta autenticada de contexto e o motor WF-04 existente.
+
+Homologacao LAB: PostgreSQL -> FastAPI -> Decision Gate ->
+WF-04 -> Ollama `qwen3:4b-instruct`.
+
+A execucao da IA exige habilitacao explicita e nao realiza
+persistencia analitica, despacho ou notificacoes.
+
+A regressao real e opcional:
+
+```powershell
+.\scripts\run-local-integrated-regression.ps1 -IncludeRuntimeAI
+```
+
+Doze testes offline adicionais preparados para o CI:
+22 suites e 204 testes previstos.
+
+A integridade em memoria e o relatorio HTML Runtime AI
+foram validados offline. A homologacao do HTML com resposta
+real do Ollama e o E2E corporativo continuam pendentes.
 
 ### Documentos de governanca
 

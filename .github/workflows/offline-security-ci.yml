@@ -198,3 +198,17 @@ jobs:
             -s tests \
             -p "test_local_runtime_composer.py" \
             -v
+
+      - name: Run local Runtime AI offline tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_local_runtime_ai.py" \
+            -v
+
+      - name: Run Runtime AI integrity and report offline tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_runtime_ai_artifacts.py" \
+            -v

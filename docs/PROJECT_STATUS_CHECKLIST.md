@@ -51,7 +51,7 @@ Incremento local da Fase 08 em branch: tres arquivos novos. Total publicado: 129
 | Observabilidade - Etapa 14 | Implementada e homologada offline |
 | Adaptador de relatorio - Etapa 15 | Implementado e homologado offline |
 | Rastreabilidade em memoria - Etapa 16 | Implementada e homologada offline |
-| GitHub Actions | 19 suites; 186/186 testes remotos aprovados |
+| GitHub Actions | Fase 08: 192/192 aprovados; Fase 09: 204 testes previstos, CI remoto pendente |
 | Integracao dinamica com E2E remoto | Pendente |
 | Ollama real no E2E remoto | Pendente |
 | Contratos para multiplas investigacoes | Homologados offline em LAB/MOCK; integracao real pendente |
@@ -139,6 +139,23 @@ A continuidade segue as fases originais 08, 09 e 11.
 - [x] Confirmar GitHub Actions remoto com 192/192 testes (run 37037435586, SUCCESS).
 - [ ] Definir conectividade aprovada para n8n corporativo.
 - [ ] Homologar integracao dinamica no workflow E2E n8n.
+
+## Fase 09 - Runtime AI local
+
+- [x] Homologar motor existente com qwen3:4b-instruct.
+- [x] Preservar bloqueio da versao historica.
+- [x] Criar adaptador dinamico com habilitacao explicita.
+- [x] Aprovar seis testes offline do adaptador.
+- [x] Homologar PostgreSQL, FastAPI e Ollama real no LAB.
+- [x] Calcular assinatura SHA-256 da analise.
+- [x] Manter revisao humana e despacho operacional bloqueado.
+- [x] Executar runner protegido e remover token DPAPI.
+- [x] Preparar ampliacao do CI para 22 suites e 204 testes.
+- [ ] Confirmar CI remoto ampliado: 22 suites e 204 testes.
+- [x] Validar contrato e assinatura LOCAL_OLLAMA offline, em memoria.
+- [x] Validar offline HTML Runtime AI com origem explicita e escape.
+- [ ] Homologar HTML com a resposta de uma execucao Ollama real.
+- [ ] Homologar percurso E2E autorizado no n8n corporativo.
 
 ## Caminho critico para a conclusao
 
