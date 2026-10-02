@@ -2,7 +2,8 @@
 
 ## Referencia
 
-- Baseline funcional: main, commit f2feb8e.
+- Baseline funcional atual: main, commit de604a3.
+- Referencia historica Etapa 19: f2feb8e.
 - Ambiente: laboratorio defensivo com dados sinteticos.
 - Objetivo: apoiar a triagem SOC N1, reduzindo retrabalho por meio de
   deduplicacao, contexto, analise assistiva e rastreabilidade.
@@ -110,3 +111,17 @@ persistencia ou despacho operacional.
 
 Qualquer integracao externa depende de ambiente autorizado e
 revisao especifica de seguranca.
+
+## Fases 08 e 09 - Integracao Python LAB homologada
+
+- PostgreSQL LAB -> FastAPI localhost autenticada.
+- Decision Gate preserva historico e seleciona versao vigente.
+- WF-04 executa Ollama local mediante habilitacao explicita.
+- runtime_integrity.py verifica SHA-256 em memoria.
+- local_runtime_ai_report.py compoe o HTML a partir da mesma chamada IA.
+- Revisao humana obrigatoria; notificacoes e despacho bloqueados.
+- CI remoto: 23 suites e 210/210 testes, run 37047930021.
+- Regressao real executada apenas no LAB, fora do CI offline.
+- Persistencia/verificacao analitica no banco nao homologada neste percurso.
+- E2E dinamico n8n remoto permanece pendente de transporte autorizado.
+- Nao expor a ponte 127.0.0.1:8765 publicamente.

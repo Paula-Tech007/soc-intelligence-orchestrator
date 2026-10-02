@@ -2,10 +2,10 @@
 
 ## Baseline vigente
 
-Commit funcional publicado: `1e0fb62`.
-GitHub Actions: execucao `37041432173`, SUCCESS.
-Python 3.12: **22 suites e 204/204 testes aprovados remotamente**.
-Nova integracao local HTML: homologada; CI de 210 testes pendente.
+Commit funcional publicado: `de604a3`.
+GitHub Actions: execucao `37047930021`, SUCCESS.
+Python 3.12: **23 suites e 210/210 testes aprovados remotamente**.
+HTML com resposta real: homologado no LAB local, separadamente do CI offline.
 
 Historico:
 - Etapa 17: 14 suites, 138 testes.
@@ -17,7 +17,7 @@ Historico:
 - Arquivos test_*.py apos nova entrega: 45.
 - Arquivos contemplados pelos padroes CI: 24.
 - Arquivos fora dos padroes do CI: 21.
-- Padroes de CI preparados: 23 (bridge contempla dois arquivos).
+- Padroes de CI homologados remotamente: 23 (bridge contempla dois arquivos).
 - Testes procedurais podem exigir execucao separada.
 
 ## Suites presentes no GitHub Actions
@@ -101,14 +101,15 @@ utiliza modelo MOCK, sem Ollama real.
 
 - Nova suite: test_local_runtime_ai.py (6 testes offline).
 - Nova suite: test_runtime_ai_artifacts.py (6 testes offline).
-- CI remoto confirmado: 22 padroes, 204/204 testes.
-- Proxima ampliacao: 23 padroes, 210 testes.
+- CI remoto anterior: 22 padroes, 204/204 (37041432173).
+- CI remoto atual: 23 padroes, 210/210 (37047930021).
+- Suite adicional: test_local_runtime_ai_report.py (6 testes).
 - Teste real opcional: local_runtime_ai_regression.py.
 - Dependencias reais: PostgreSQL LAB, FastAPI e Ollama local.
 - Runner: run-local-integrated-regression.ps1 -IncludeRuntimeAI.
 - Homologacao real local: SUCCESS.
 - CI remoto de 204 testes: aprovado (37041432173).
-- Nova ampliacao para 210 testes: pendente.
+- CI remoto de 210 testes: aprovado (37047930021).
 
 A chamada real nao integra o CI offline. O SHA-256
 foi calculado sobre a analise, sem verificacao persistente.
@@ -173,7 +174,7 @@ Eles nao comprovam, isoladamente, acesso real a servicos.
 O repositorio tambem possui testes JavaScript, fixtures,
 scripts auxiliares e testes de integracao local.
 Eles nao integram automaticamente o conjunto oficial
-de 186 testes Python do CI vigente.
+de 210 testes Python do CI vigente.
 
 ## Criterios para ampliar o CI
 

@@ -840,8 +840,9 @@ O novo compositor e `src/context/local_runtime_ai_report.py`.
 A regressao real produz HTML sintetico na pasta temporaria
 do Windows e preserva a revisao humana obrigatoria.
 
-CI remoto publicado: 204/204 (run 37041432173).
-Nova suite offline preparada: 23 padroes, 210 testes previstos.
+CI remoto atual: 23 suites, 210/210 testes aprovados
+(run 37047930021). Historico anterior: 204/204
+(run 37041432173).
 O E2E corporativo continua pendente de integracao autorizada.
 
 ### Documentos de governanca
@@ -850,11 +851,10 @@ O E2E corporativo continua pendente de integracao autorizada.
 - [Project Status Checklist](docs/PROJECT_STATUS_CHECKLIST.md): estado das entregas e pendencias.
 - [Test Strategy](docs/TEST_STRATEGY.md): cobertura e classificacao dos testes.
 
-**Baseline funcional publicada:** `1e0fb62`.
+**Baseline funcional publicada:** `de604a3`.
 
-GitHub Actions: **22 suites e 204/204 testes aprovados remotamente**
-(execucao `37041432173`). Ampliacao para 210 testes
-preparada na branch de integracao HTML. E2E n8n remoto pendente.
+GitHub Actions: **23 suites e 210/210 testes aprovados remotamente**
+(execucao `37047930021`). E2E n8n remoto pendente.
 
 ---
 

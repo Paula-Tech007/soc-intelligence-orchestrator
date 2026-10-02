@@ -2,8 +2,9 @@
 
 ## Referencia
 
-Baseline funcional: f2feb8e.
-CI remoto: execucao 37032159353, SUCCESS, 186/186.
+Baseline funcional publicada: de604a3.
+CI remoto: execucao 37047930021, SUCCESS, 210/210.
+Historico Etapa 19: f2feb8e, 186/186.
 
 Legenda:
 - IMPLEMENTADO: componente existe no repositorio.
@@ -12,7 +13,7 @@ Legenda:
 - INTEGRADO MOCK: participa de pipeline demonstrativo.
 - PENDENTE: entrega ainda nao concluida no escopo indicado.
 
-## Inventario vigente e incremento em homologacao
+## Inventario historico da Etapa 19
 
 Referencia: Etapa 19, commit `f2feb8e`.
 
@@ -29,7 +30,8 @@ Referencia: Etapa 19, commit `f2feb8e`.
 
 Inventarios antigos permanecem no historico Git.
 
-Incremento local da Fase 08 em branch: tres arquivos novos. Total publicado: 129 arquivos (commit 4af8325).
+Historico Fase 08: 129 arquivos publicados (commit 4af8325).
+Este inventario e historico, nao representa a contagem atual da Fase 09.
 
 ## Checklist de componentes
 
@@ -51,7 +53,7 @@ Incremento local da Fase 08 em branch: tres arquivos novos. Total publicado: 129
 | Observabilidade - Etapa 14 | Implementada e homologada offline |
 | Adaptador de relatorio - Etapa 15 | Implementado e homologado offline |
 | Rastreabilidade em memoria - Etapa 16 | Implementada e homologada offline |
-| GitHub Actions | Fase 09: 204/204 aprovados (37041432173); proxima ampliacao 210 pendente |
+| GitHub Actions | Fase 09: 23 suites, 210/210 aprovados (37047930021) |
 | Integracao dinamica com E2E remoto | Pendente |
 | Ollama real no E2E remoto | Pendente |
 | Contratos para multiplas investigacoes | Homologados offline em LAB/MOCK; integracao real pendente |
@@ -152,7 +154,7 @@ A continuidade segue as fases originais 08, 09 e 11.
 - [x] Executar runner protegido e remover token DPAPI.
 - [x] Preparar ampliacao do CI para 22 suites e 204 testes.
 - [x] CI remoto Fase 09: 22 suites, 204/204 testes (run 37041432173, SUCCESS).
-- [ ] Confirmar CI ampliado com HTML integrado: 23 suites, 210 testes previstos.
+- [x] Confirmar CI ampliado com HTML integrado: 23 suites, 210/210 testes (run 37047930021, SUCCESS).
 - [x] Validar contrato e assinatura LOCAL_OLLAMA offline, em memoria.
 - [x] Validar offline HTML Runtime AI com origem explicita e escape.
 - [x] Homologar HTML com resposta real do Ollama: queues 12/13, integridade em memoria, revisao humana; runner DPAPI aprovado.
