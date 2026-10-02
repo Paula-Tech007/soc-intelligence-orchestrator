@@ -509,6 +509,107 @@ node tests/test_wf010204_integrated_lab.js
 
 ---
 
+## 10.5 Ponte PostgreSQL local autenticada
+
+A camada Python disponibiliza uma ponte FastAPI para consultas
+reais ao PostgreSQL do laboratorio.
+
+Essa implementacao e independente do workflow E2E n8n
+e utiliza exclusivamente dados sinteticos do ambiente SOC-LAB.
+
+### Arquitetura local
+
+```text
+CLIENTE HTTP LOCAL
+       |
+       v
+FASTAPI - Bearer Authentication
+       |
+       v
+WF-03 - Context Builder
+       |
+       v
+POSTGRESQL - soc_bridge_ro
+```
+
+**Controles implementados:**
+
+- Autenticacao HTTP Bearer.
+- Credenciais protegidas por DPAPI do Windows, fora do Git.
+- Conta PostgreSQL `soc_bridge_ro` com permissoes SELECT restritas.
+- Validacao de `queue_id` e tratamento seguro de erros.
+- Inicializacao exclusivamente em `127.0.0.1:8765`.
+- Uvicorn com um worker e limite de concorrencia de 10.
+- Encerramento controlado com limpeza das variaveis temporarias.
+
+### Dependencias adicionais
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements-bridge.txt
+```
+
+### Iniciar a API local
+
+O PostgreSQL do laboratorio deve estar disponivel e as
+credenciais DPAPI locais devem ter sido configuradas.
+
+A partir da raiz do repositorio:
+
+```powershell
+.\scripts\start-local-bridge.ps1
+```
+
+O inicializador recupera as credenciais protegidas e inicia
+a API em primeiro plano.
+
+Endpoint de diagnostico:
+
+```text
+GET http://127.0.0.1:8765/health
+```
+
+Endpoint protegido:
+
+```text
+GET http://127.0.0.1:8765/lab/context/{queue_id}
+Authorization: Bearer <TOKEN_LOCAL>
+```
+
+O token apresentado acima e apenas um marcador explicativo.
+Nao armazene tokens reais no README, no codigo ou no historico Git.
+
+Para encerrar o servico, pressione `Ctrl+C` no terminal
+em que o inicializador esta em execucao.
+
+### Validacao
+
+A regressao da ponte inclui 17 testes automatizados aprovados,
+alem de homologacao HTTP local com consulta real ao PostgreSQL.
+
+A consulta autenticada da queue 13 recuperou o evento sintetico
+`LAB-0001`, versao 2, com duas evidencias e despacho bloqueado.
+
+### Separacao entre as implementacoes
+
+| Componente | Estado |
+|---|---|
+| FastAPI + PostgreSQL local | Integracao real homologada |
+| Autenticacao HTTP Bearer | Implementada |
+| Workflow n8n E2E | `MOCK_SNAPSHOT` |
+| Consulta remota n8n para a API | Nao implementada |
+| Chamada real ao Ollama no E2E | Nao implementada |
+| Notificacoes operacionais | Desabilitadas |
+
+**Importante:** a API nao deve ser exposta publicamente.
+O limite de concorrencia nao equivale a rate limiting por cliente.
+
+Qualquer integracao futura com infraestrutura corporativa
+depende de autorizacao e revisao especifica de seguranca.
+
+Documentacao completa:
+[`docs/LOCAL_POSTGRES_BRIDGE.md`](docs/LOCAL_POSTGRES_BRIDGE.md).
+
+---
 # ◈ 11. EXECUTAR O WORKFLOW E2E NO N8N
 
 O principal artefato demonstrável do projeto está disponível em:
