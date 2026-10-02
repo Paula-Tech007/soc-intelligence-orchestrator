@@ -109,3 +109,24 @@ jobs:
             -s tests \
             -p "test_integrated_mock_regression.py" \
             -v
+
+      - name: Run observability collector tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_observability_collector.py" \
+            -v
+
+      - name: Run observed pipeline tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_observed_mock_pipeline.py" \
+            -v
+
+      - name: Run observability integration tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_observability_integration.py" \
+            -v
