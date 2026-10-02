@@ -208,3 +208,47 @@ servico e nao valida conectividade com o banco.
 Revisar os controles de seguranca restantes e o
 modelo de integracao futura antes de qualquer
 comunicacao com infraestrutura corporativa.
+---
+
+## Etapa 06.8 - Revisao de Seguranca Local
+
+Status: regressao de seguranca aprovada.
+
+Arquivo: `tests/test_bridge_security.py`.
+
+### Controles verificados
+
+| Controle | Resultado |
+|---|---|
+| Token ausente | HTTP 401 |
+| Token incorreto | HTTP 401 |
+| Segredo do servidor ausente | HTTP 503 |
+| Queue ID nao numerico | HTTP 422 |
+| Queue ID acima do limite | HTTP 422 |
+| Falha interna do banco | HTTP 503 sanitizado |
+| Health sem consulta ao PostgreSQL | Aprovado |
+
+Os testes verificam que requisicoes nao autorizadas
+nao executam `build_context()`.
+
+### Resultado automatizado
+
+17 testes aprovados:
+
+- 10 testes funcionais da API;
+- 7 testes adicionais de seguranca.
+
+Esses testes utilizam mocks e nao modificam o PostgreSQL.
+
+A integracao HTTP com banco real e conta `soc_bridge_ro`
+foi homologada separadamente nas etapas anteriores.
+
+### Controles ainda pendentes
+
+- Limite configurado de concorrencia no servidor.
+- Rate limiting por cliente.
+- Definicao de transporte seguro para integracao remota.
+- Autorizacao formal antes de qualquer uso com n8n corporativo.
+
+O servico permanece exclusivo do LAB local, vinculado
+a `127.0.0.1`, sem despacho operacional.
