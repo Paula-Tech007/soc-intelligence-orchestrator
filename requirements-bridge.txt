@@ -1,0 +1,7 @@
+# Local PostgreSQL Bridge - LAB
+fastapi>=0.115,<1
+uvicorn>=0.30,<1
+psycopg>=3,<4
+
+# Testes HTTP / ASGI
+httpx>=0.27,<1

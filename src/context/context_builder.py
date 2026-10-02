@@ -63,13 +63,13 @@ def indicators(event):
     }
 
 
-def build_context(queue_id):
+def build_context(queue_id, *, connection_factory=None):
     """Constroi contexto referente a uma versao especifica."""
 
     if type(queue_id) is not int or queue_id <= 0:
         raise ValueError("queue_id invalido.")
 
-    with connect_db() as connection:
+    with (connection_factory or connect_db)() as connection:
 
         # Este modulo executa apenas SELECT.
         with connection.cursor() as cursor:
