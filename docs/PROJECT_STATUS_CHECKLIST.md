@@ -173,3 +173,21 @@ A continuidade segue as fases originais 08, 09 e 11.
 Integracao externa depende de transporte seguro e autorizacao.
 Revisao humana permanece obrigatoria.
 Despacho operacional e notificacoes reais desabilitados.
+
+## Fase 09 - Homologacao do receptor n8n LAB
+
+- [x] n8n SOC LAB isolado do Cyberlab original.
+- [x] E2E MOCK de 20 nos homologado no Docker.
+- [x] Transporte HTTP Windows -> n8n homologado.
+- [x] Header Auth: sem chave HTTP 403 na sonda de transporte.
+- [x] Relatorio Python/Ollama recebido com autenticacao.
+- [x] SHA-256 recalculado independentemente pelo Crypto.
+- [x] HTML original aceito: HTTP 200 / HASH_VERIFIED_IN_N8N.
+- [x] HTML adulterado recusado: HTTP 422 / HASH_MISMATCH.
+- [x] Workflow receptor exportado sem vinculo de credencial.
+- [ ] n8n iniciar processamento Python por transporte autorizado.
+- [ ] E2E dinamico corporativo autorizado e homologado.
+
+Evidencias tecnicas: docs/PHASE09_N8N_LAB_REPORT_RECEIVER.md.
+Os testes HTTP sao manuais do LAB e nao alteram a contagem
+do CI offline de 210/210 testes.

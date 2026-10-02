@@ -1,0 +1,108 @@
+{
+  "name": "SOC LAB | Runtime AI Report Receiver",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "soc-lab-runtime-report",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "0c8fa95b-2d45-4470-a9fe-9580e7449383",
+      "name": "01 - Receber Evento LAB",
+      "webhookId": "958590ec-7f68-4519-b559-4fb47eeb9f60",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        -208,
+        0
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseCode": "={{ $json.transport_status === 'ACCEPTED_RUNTIME_REPORT' ? 200 : 422 }}"
+        }
+      },
+      "id": "6762892b-c335-4d5f-8528-9d78c8976ded",
+      "name": "03 - Responder Confirmacao",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [
+        512,
+        0
+      ],
+      "typeVersion": 1.4
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst cryptoResult = $input.first().json;\nconst body = $('01 - Receber Evento LAB').first().json.body;\n\n// Resposta controlada para contratos rejeitados.\nfunction reject(reason) {\n  return [{\n    json: {\n      schema_version: '1.0',\n      environment: 'LAB',\n      processor: 'N8N_RUNTIME_REPORT_RECEIVER',\n      transport_status: 'REJECTED_RUNTIME_REPORT',\n      integrity_status: 'REJECTED',\n      reason_code: reason,\n      html_sha256_verified: false,\n      human_review_completed: false,\n      operational_dispatch_allowed: false,\n      notification_sent: false,\n      test_only: true\n    }\n  }];\n}\n\n// 1. Validacao da estrutura.\nif (!body || typeof body !== 'object' || Array.isArray(body)) {\n  return reject('INVALID_PAYLOAD');\n}\n\n// 2. Contrato esperado.\nconst expected = {\n  schema_version: '1.0',\n  environment: 'LAB',\n  processor: 'LOCAL_RUNTIME_AI_REPORT',\n  source_event_id: 'LAB-0001',\n  historical_queue_id: 12,\n  historical_status: 'SKIPPED',\n  current_queue_id: 13,\n  execution_mode: 'LOCAL_OLLAMA',\n  report_status: 'AWAITING_HUMAN_REVIEW',\n  human_review_required: true,\n  human_review_completed: false,\n  verified_against_database: false,\n  persistence_status: 'NOT_ATTEMPTED',\n  operational_dispatch_allowed: false,\n  notification_sent: false,\n  test_only: true\n};\n\nfor (const [key, value] of Object.entries(expected)) {\n  if (body[key] !== value) {\n    return reject('INVALID_CONTRACT');\n  }\n}\n\n// 3. Validacao do HTML.\nif (\n  typeof body.html !== 'string' ||\n  body.html.length < 100 ||\n  body.html.length > 100000 ||\n  !body.html.startsWith('<!DOCTYPE html>') ||\n  !body.html.includes('LAB-0001') ||\n  !body.html.includes('OLLAMA LOCAL - ANALISE REAL') ||\n  !body.html.includes('REVISAO HUMANA OBRIGATORIA')\n) {\n  return reject('INVALID_HTML');\n}\n\n// 4. Comparacao das assinaturas.\nconst declared = body.html_sha256;\nconst computed = cryptoResult.html_sha256_computed;\n\nconst pattern = /^[a-fA-F0-9]{64}$/;\n\nif (\n  typeof declared !== 'string' ||\n  !pattern.test(declared) ||\n  typeof computed !== 'string' ||\n  !pattern.test(computed)\n) {\n  return reject('INVALID_SHA256');\n}\n\nif (declared.toLowerCase() !== computed.toLowerCase()) {\n  return reject('HASH_MISMATCH');\n}\n\n// 5. Somente o contrato integro recebe aprovacao.\nreturn [{\n  json: {\n    schema_version: '1.0',\n    environment: 'LAB',\n    processor: 'N8N_RUNTIME_REPORT_RECEIVER',\n\n    transport_status: 'ACCEPTED_RUNTIME_REPORT',\n    integrity_status: 'HASH_VERIFIED_IN_N8N',\n\n    source_event_id: body.source_event_id,\n    historical_queue_id: 12,\n    historical_status: 'SKIPPED',\n    current_queue_id: 13,\n\n    execution_mode: 'LOCAL_OLLAMA',\n    report_status: 'AWAITING_HUMAN_REVIEW',\n\n    html_received: true,\n    html_sha256_verified: true,\n    html_sha256_computed: computed.toLowerCase(),\n\n    human_review_required: true,\n    human_review_completed: false,\n    operational_dispatch_allowed: false,\n    notification_sent: false,\n    test_only: true\n  }\n}];\n"
+      },
+      "id": "5dd07b2a-5e8d-4f82-9da3-11af65e18d76",
+      "name": "02 - Validar Runtime AI Report",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        288,
+        0
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "value": "={{ $json.body.html }}",
+        "dataPropertyName": "html_sha256_computed"
+      },
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 2,
+      "position": [
+        48,
+        0
+      ],
+      "id": "f2d206f2-2d5a-4a77-ab89-f1d91d44d58f",
+      "name": "01B - Calcular SHA256 do HTML"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "01 - Receber Evento LAB": {
+      "main": [
+        [
+          {
+            "node": "01B - Calcular SHA256 do HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 - Validar Runtime AI Report": {
+      "main": [
+        [
+          {
+            "node": "03 - Responder Confirmacao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "01B - Calcular SHA256 do HTML": {
+      "main": [
+        [
+          {
+            "node": "02 - Validar Runtime AI Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "tags": []
+}
