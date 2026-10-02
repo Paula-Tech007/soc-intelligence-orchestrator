@@ -356,69 +356,150 @@ O resultado completo também contém o campo `html`, com o relatório técnico p
 
 # ◈ 08. ESTRUTURA DO REPOSITÓRIO
 
+Inventario consolidado da Etapa 17: **116 arquivos versionados + 3 documentos novos** (119 arquivos nesta entrega).
+
+A arvore abaixo foi gerada a partir do inventario Git.
+
 ```text
 soc-intelligence-orchestrator/
-│
-├── database/
-│   ├── schema.sql
-│   └── 002_ai_analysis_integrity.sql
-│
-├── src/
-│   │
-│   ├── collector/
-│   │   └── wf01_bridge.py
-│   │
-│   ├── dedup/
-│   │   └── persistence.py
-│   │
-│   ├── context/
-│   │   ├── context_builder.py
-│   │   └── wf02_wf03_bridge.py
-│   │
-│   ├── ai_engine/
-│   │   ├── engine.py
-│   │   ├── cache.py
-│   │   ├── integrity.py
-│   │   ├── integrity_bridge.py
-│   │   ├── integrity_persistence.py
-│   │   └── persistent_bridge.py
-│   │
-│   └── reports/
-│       ├── report_builder.py
-│       ├── persistent_handoff.py
-│       └── persistent_report.py
-│
-├── workflows/
-│   ├── WF-00-SOC-Orchestrator.json
-│   ├── WF-01-Coleta-de-Eventos.json
-│   ├── WF-02-Normalizacao-e-Deduplicacao.json
-│   ├── WF-03-Contexto-e-Correlacao.json
-│   ├── WF-04-Motor-de-IA.json
-│   ├── WF-05-Relatorios-e-Revisao-Humana.json
-│   │
-│   ├── INTEGRACAO-WF01-WF02-LAB.json
-│   ├── INTEGRACAO-WF01-WF02-WF03-LAB.json
-│   ├── INTEGRACAO-WF01-WF02-WF03-WF04-LAB.json
-│   ├── INTEGRACAO-WF04-WF05-LAB.json
-│   ├── INTEGRACAO-WF04-WF05-INTEGRIDADE-LAB.json
-│   ├── INTEGRACAO-WF04-WF05-HTML-DINAMICO-LAB.json
-│   │
-│   └── SOC-INTELLIGENCE-ORCHESTRATOR-E2E-LAB.json
-│
-├── tests/
-│   ├── fixtures/
-│   ├── test_*.py
-│   ├── test_*.js
-│   └── export_*.py
-│
-├── reports/
-│   └── LAB-0001/
-│       └── SOC-LAB-0001-V2-MOCK.html
-│
-├── .env.example
-├── .gitignore
-├── docker-compose.yml
-└── README.md
+|-- .github/
+|   +-- workflows/
+|       +-- offline-security-ci.yml
+|-- database/
+|   |-- 002_ai_analysis_integrity.sql
+|   +-- schema.sql
+|-- docs/
+|   |-- assets/
+|   |   +-- soc-banner.png
+|   |-- AI_REVIEW_ORCHESTRATION.md
+|   |-- ARCHITECTURE_BASELINE.md
+|   |-- AUTOMATED_INTEGRATION_REGRESSION.md
+|   |-- CONTEXT_DECISION_GATE.md
+|   |-- INTEGRATED_LOCAL_HOMOLOGATION.md
+|   |-- INTEGRATED_MOCK_REPORT.md
+|   |-- LOCAL_CONTEXT_CLIENT.md
+|   |-- LOCAL_PIPELINE_OBSERVABILITY.md
+|   |-- LOCAL_POSTGRES_BRIDGE.md
+|   |-- MEMORY_PERSISTENCE_TRACEABILITY.md
+|   |-- PROJECT_STATUS_CHECKLIST.md
+|   +-- TEST_STRATEGY.md
+|-- reports/
+|   +-- LAB-0001/
+|       +-- SOC-LAB-0001-V2-MOCK.html
+|-- scripts/
+|   |-- run-local-integrated-regression.ps1
+|   +-- start-local-bridge.ps1
+|-- src/
+|   |-- ai_engine/
+|   |   |-- cache.py
+|   |   |-- engine.py
+|   |   |-- integrity.py
+|   |   |-- integrity_bridge.py
+|   |   |-- integrity_persistence.py
+|   |   |-- persistent_bridge.py
+|   |   |-- review_adapter.py
+|   |   |-- review_integrity.py
+|   |   +-- review_orchestrator.py
+|   |-- bridge/
+|   |   |-- __init__.py
+|   |   |-- app.py
+|   |   |-- auth.py
+|   |   +-- db.py
+|   |-- collector/
+|   |   +-- wf01_bridge.py
+|   |-- context/
+|   |   |-- context_builder.py
+|   |   |-- decision_gate.py
+|   |   |-- integrated_mock_pipeline.py
+|   |   |-- local_decision_pipeline.py
+|   |   |-- local_http_client.py
+|   |   +-- wf02_wf03_bridge.py
+|   |-- dedup/
+|   |   +-- persistence.py
+|   |-- observability/
+|   |   |-- __init__.py
+|   |   |-- collector.py
+|   |   |-- memory_trace_registry.py
+|   |   |-- persistence_traceability.py
+|   |   +-- pipeline.py
+|   +-- reports/
+|       |-- integrated_mock_adapter.py
+|       |-- persistent_handoff.py
+|       |-- persistent_report.py
+|       +-- report_builder.py
+|-- tests/
+|   |-- fixtures/
+|   |   |-- evento_novo.json
+|   |   |-- wf01_batch_lab.json
+|   |   |-- wf01_real_output.json
+|   |   |-- wf02_wf03_verified_export_lab.json
+|   |   |-- wf03_context_snapshot.json
+|   |   |-- wf04_output_mock.json
+|   |   +-- wf04_wf05_integrity_mock.json
+|   |-- export_integrity_contract.py
+|   |-- export_wf04_contract.py
+|   |-- import_wf01_output.ps1
+|   |-- local_integrated_regression.py
+|   |-- test_ai_cache.py
+|   |-- test_ai_engine.py
+|   |-- test_ai_engine_live.py
+|   |-- test_ai_integrity.py
+|   |-- test_ai_review_adapter.py
+|   |-- test_ai_review_integrity.py
+|   |-- test_ai_review_orchestrator.py
+|   |-- test_bridge_api.py
+|   |-- test_bridge_security.py
+|   |-- test_context_builder.py
+|   |-- test_decision_gate.py
+|   |-- test_integrated_mock_regression.py
+|   |-- test_integrated_mock_report.py
+|   |-- test_integrity_bridge.py
+|   |-- test_integrity_first_insert_race.py
+|   |-- test_integrity_injected_rollback.py
+|   |-- test_integrity_persistence_live.py
+|   |-- test_local_decision_pipeline.py
+|   |-- test_local_http_client.py
+|   |-- test_memory_trace_registry.py
+|   |-- test_memory_traceability.py
+|   |-- test_observability_collector.py
+|   |-- test_observability_integration.py
+|   |-- test_observed_mock_pipeline.py
+|   |-- test_ollama_smoke.py
+|   |-- test_persistence_smoke.py
+|   |-- test_persistent_bridge.py
+|   |-- test_persistent_handoff.py
+|   |-- test_persistent_report.py
+|   |-- test_report_builder.py
+|   |-- test_wf010203_integrated_lab.py
+|   |-- test_wf010204_integrated_lab.js
+|   |-- test_wf01_integration.py
+|   |-- test_wf01_wf02_integrated_lab.js
+|   |-- test_wf02_wf03_bridge_live.py
+|   |-- test_wf03_integrated_contract.py
+|   |-- test_wf04_envelope_integration.py
+|   +-- test_wf04_wf05_handoff.py
+|-- workflows/
+|   |-- INTEGRACAO-WF01-WF02-LAB.json
+|   |-- INTEGRACAO-WF01-WF02-WF03-LAB.json
+|   |-- INTEGRACAO-WF01-WF02-WF03-WF04-LAB.json
+|   |-- INTEGRACAO-WF04-WF05-HTML-DINAMICO-LAB.json
+|   |-- INTEGRACAO-WF04-WF05-INTEGRIDADE-LAB.json
+|   |-- INTEGRACAO-WF04-WF05-LAB.json
+|   |-- SOC-INTELLIGENCE-ORCHESTRATOR-E2E-LAB.json
+|   |-- TESTE-DINAMICO-WF04-WF05-LAB.json
+|   |-- TESTE-NEGATIVO-INTEGRIDADE-FASE-13.6.4.json
+|   |-- WF-00-SOC-Orchestrator.json
+|   |-- WF-01-Coleta-de-Eventos.json
+|   |-- WF-02-Normalizacao-e-Deduplicacao.json
+|   |-- WF-03-Contexto-e-Correlacao.json
+|   |-- WF-04-Motor-de-IA.json
+|   +-- WF-05-Relatorios-e-Revisao-Humana.json
+|-- .env.example
+|-- .gitignore
+|-- docker-compose.yml
+|-- README.md
+|-- requirements-bridge.txt
++-- requirements-ci.txt
 ```
 
 ---
@@ -661,8 +742,21 @@ O projeto foi estruturado para evoluir de um laboratório controlado para uma ar
 | **07 — E2E Integration** | Workflow integrado com 20 nós. | ✅ Homologado |
 | **08 — Runtime Database** | Integrar PostgreSQL dinamicamente ao n8n. | ⬜ Planejado |
 | **09 — Runtime AI** | Conectar Ollama ao fluxo E2E. | ⬜ Planejado |
-| **10 — Observability** | Logs estruturados, métricas e rastreabilidade. | ⬜ Planejado |
+| **10 - Observability** | Telemetria sanitizada e rastreabilidade em memoria. | Homologado offline (Etapas 14 e 16) |
 | **11 — Portfolio Release** | Demonstração reproduzível e evidências visuais. | ⬜ Em evolução |
+| **12 - MOCK Reporting Integration** | Pipeline observado integrado ao WF-05. | Etapa 15 homologada |
+| **13 - Memory Traceability** | Identidade SHA-256 e controle temporario de conflitos. | Etapa 16 homologada |
+| **14 - Architecture Consolidation** | Inventario, responsabilidades, checklist e testes. | Etapa 17 em andamento |
+
+### Documentos centrais da Etapa 17
+
+- [Architecture Baseline](docs/ARCHITECTURE_BASELINE.md): arquitetura e responsabilidades.
+- [Project Status Checklist](docs/PROJECT_STATUS_CHECKLIST.md): estado das entregas e pendencias.
+- [Test Strategy](docs/TEST_STRATEGY.md): cobertura e classificacao dos testes.
+
+**Baseline:** `e71d81c`.
+
+GitHub Actions: 14 suites e 138 testes offline aprovados. A integracao dinamica do E2E remoto permanece pendente.
 
 ---
 
