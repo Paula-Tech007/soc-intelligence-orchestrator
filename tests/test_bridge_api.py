@@ -5,6 +5,7 @@ Nao realiza conexoes reais ao banco.
 Testa os contratos HTTP e a injecao da conexao restrita.
 """
 
+import os
 import unittest
 from unittest.mock import patch
 
@@ -43,7 +44,17 @@ def make_context(queue_id=13, historical=False):
 class TestBridgeAPI(unittest.TestCase):
 
     def setUp(self):
-        self.client = TestClient(app)
+        self.token = 'LAB_TEST_TOKEN_' + ('x' * 40)
+        self.env_patch = patch.dict(
+            os.environ,
+            {'SOC_BRIDGE_HTTP_TOKEN': self.token},
+        )
+        self.env_patch.start()
+        self.addCleanup(self.env_patch.stop)
+        self.client = TestClient(
+            app,
+            headers={'Authorization': f'Bearer {self.token}'},
+        )
 
     def tearDown(self):
         self.client.close()
@@ -154,6 +165,36 @@ class TestBridgeAPI(unittest.TestCase):
         response = self.client.get("/lab/context/0")
 
         self.assertEqual(response.status_code, 422)
+
+
+
+    def test_missing_bearer_token(self):
+
+        response = self.client.get(
+            "/lab/context/13",
+            headers={"Authorization": ""},
+        )
+
+        self.assertEqual(response.status_code, 401)
+
+    def test_invalid_bearer_token(self):
+
+        response = self.client.get(
+            "/lab/context/13",
+            headers={"Authorization": "Bearer INVALID_TOKEN"},
+        )
+
+        self.assertEqual(response.status_code, 401)
+
+    def test_authentication_not_configured(self):
+
+        with patch.dict(
+            os.environ,
+            {"SOC_BRIDGE_HTTP_TOKEN": ""},
+        ):
+            response = self.client.get("/lab/context/13")
+
+        self.assertEqual(response.status_code, 503)
 
 
 if __name__ == "__main__":

@@ -139,3 +139,72 @@ depende de autorizacao e de um desenho de seguranca especifico.
 
 Planejar a continuidade da integracao de forma isolada,
 preservando o E2E homologado e os contratos de revisao humana.
+---
+
+## Etapa 06.7 - Autenticacao HTTP Bearer
+
+Status: homologada no laboratorio local.
+
+### Implementacao
+
+O modulo `src/bridge/auth.py` valida o cabecalho
+`Authorization: Bearer <TOKEN>`.
+
+O token esperado e recebido exclusivamente pela variavel
+de ambiente `SOC_BRIDGE_HTTP_TOKEN`.
+
+A comparacao utiliza `secrets.compare_digest`.
+
+A credencial HTTP e gerada com fonte criptografica,
+protegida por DPAPI do usuario Windows e mantida fora
+do repositorio Git.
+
+### Politica das rotas
+
+| Rota | Autenticacao |
+|---|---|
+| GET /health | Nao exige token |
+| GET /lab/context/{queue_id} | Exige Bearer valido |
+
+O servico permanece vinculado exclusivamente a
+`127.0.0.1:8765`.
+
+A rota de contexto reutiliza o WF-03 e estabelece
+a conexao PostgreSQL pela conta `soc_bridge_ro`.
+
+### Resultado da homologacao
+
+| Verificacao | Resultado |
+|---|---|
+| Health | HTTP 200 |
+| Token ausente | HTTP 401 |
+| Token invalido | HTTP 401 |
+| Token valido | Contexto LAB recuperado |
+| Evento | LAB-0001 |
+| Queue ID | 13 |
+| Versao | 2 |
+| Evidencias | 2 |
+| Consulta real ao banco | True |
+| Despacho operacional | False |
+
+Os testes automatizados da API passaram de sete
+para dez casos, todos aprovados.
+
+### Limitacoes de seguranca
+
+Esta etapa nao implementa publicacao externa,
+TLS para acesso remoto, rate limiting, autenticacao
+corporativa ou integracao com o n8n empresarial.
+
+O Bearer utilizado em HTTP local nao deve ser
+transmitido por redes externas sem uma arquitetura
+de transporte seguro previamente aprovada.
+
+O endpoint `/health` informa apenas o estado do
+servico e nao valida conectividade com o banco.
+
+### Proxima etapa
+
+Revisar os controles de seguranca restantes e o
+modelo de integracao futura antes de qualquer
+comunicacao com infraestrutura corporativa.

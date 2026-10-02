@@ -6,10 +6,11 @@ API HTTP exclusivamente local e de leitura.
 Nao executa IA, nao altera filas e nao envia notificacoes.
 """
 
-from fastapi import FastAPI, HTTPException, Path
+from fastapi import Depends, FastAPI, HTTPException, Path
 
 from src.context.context_builder import build_context
 from src.bridge.db import connect_bridge_db
+from src.bridge.auth import require_lab_token
 
 
 app = FastAPI(
@@ -41,6 +42,7 @@ def health():
 @app.get("/lab/context/{queue_id}")
 def get_lab_context(
     queue_id: int = Path(ge=1, le=2147483647),
+    _authenticated: None = Depends(require_lab_token),
 ):
     """
     Consulta um contexto ja existente.
