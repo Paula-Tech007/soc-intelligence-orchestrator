@@ -356,7 +356,7 @@ O resultado completo também contém o campo `html`, com o relatório técnico p
 
 # ◈ 08. ESTRUTURA DO REPOSITÓRIO
 
-Inventario consolidado da Etapa 17: **116 arquivos versionados + 3 documentos novos** (119 arquivos nesta entrega).
+Inventario da Etapa 17: **119 arquivos versionados**. A Etapa 18 acrescenta quatro arquivos de testes, totalizando **123 arquivos previstos apos publicacao**.
 
 A arvore abaixo foi gerada a partir do inventario Git.
 
@@ -451,6 +451,10 @@ soc-intelligence-orchestrator/
 |   |-- test_bridge_security.py
 |   |-- test_context_builder.py
 |   |-- test_decision_gate.py
+|   |-- test_generic_integrated_mock_report.py
+|   |-- test_generic_memory_trace_registry.py
+|   |-- test_generic_memory_traceability.py
+|   |-- test_generic_wf05_contract.py
 |   |-- test_integrated_mock_regression.py
 |   |-- test_integrated_mock_report.py
 |   |-- test_integrity_bridge.py
@@ -746,7 +750,8 @@ O projeto foi estruturado para evoluir de um laboratório controlado para uma ar
 | **11 — Portfolio Release** | Demonstração reproduzível e evidências visuais. | ⬜ Em evolução |
 | **12 - MOCK Reporting Integration** | Pipeline observado integrado ao WF-05. | Etapa 15 homologada |
 | **13 - Memory Traceability** | Identidade SHA-256 e controle temporario de conflitos. | Etapa 16 homologada |
-| **14 - Architecture Consolidation** | Inventario, responsabilidades, checklist e testes. | Etapa 17 em andamento |
+| **14 - Architecture Consolidation** | Inventario, responsabilidades, checklist e testes. | Etapa 17 concluida |
+| **15 - Generic LAB Contracts** | WF-05, adaptador MOCK e rastreabilidade parametrizaveis. | Etapa 18 homologada localmente; CI remoto pendente |
 
 ### Documentos centrais da Etapa 17
 
@@ -756,7 +761,7 @@ O projeto foi estruturado para evoluir de um laboratório controlado para uma ar
 
 **Baseline:** `e71d81c`.
 
-GitHub Actions: 14 suites e 138 testes offline aprovados. A integracao dinamica do E2E remoto permanece pendente.
+GitHub Actions: baseline anterior com 14 suites e 138 testes. Etapa 18 com 18 suites e 180 testes unittest aprovados localmente, alem de sete verificacoes procedurais legadas. A execucao remota do CI ampliado e a integracao dinamica do E2E permanecem pendentes.
 
 ---
 

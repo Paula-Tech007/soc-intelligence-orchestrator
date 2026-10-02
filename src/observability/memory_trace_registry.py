@@ -12,6 +12,9 @@ import copy
 import re
 
 from src.ai_engine.integrity import sha256_json
+from src.observability.persistence_traceability import (
+    build_memory_traceability,
+)
 
 
 class MemoryTraceConflictError(ValueError):
@@ -57,7 +60,7 @@ class MemoryTraceRegistry:
         self._by_result_key = {}
 
     @classmethod
-    def _validate(cls, trace):
+    def _validate(cls, trace, *, generic=False):
         if not isinstance(trace, dict):
             raise ValueError("Rastreabilidade invalida.")
 
@@ -98,9 +101,14 @@ class MemoryTraceRegistry:
             identity.get("environment") != "LAB"
             or identity.get("execution_mode") != "MOCK_AI_RESPONSE"
             or type(identity.get("queue_id")) is not int
-            or identity["queue_id"] != 13
+            or identity["queue_id"] < 1
+            or (not generic and identity["queue_id"] != 13)
             or type(identity.get("investigation_version")) is not int
-            or identity["investigation_version"] != 2
+            or identity["investigation_version"] < 1
+            or (
+                not generic
+                and identity["investigation_version"] != 2
+            )
         ):
             raise ValueError("Identidade fora do escopo LAB.")
 
@@ -113,20 +121,39 @@ class MemoryTraceRegistry:
             if not isinstance(value, str) or not value.strip():
                 raise ValueError("Identificacao invalida: " + field)
 
-        if identity["source_event_id"] != "LAB-0001":
+        if (
+            not generic
+            and identity["source_event_id"] != "LAB-0001"
+        ):
             raise ValueError("Evento fora do contrato homologado.")
 
         historical = trace["historical_control"]
 
-        if (
-            type(historical) is not dict
-            or historical != {
-                "queue_id": 12,
-                "investigation_version": 1,
-                "status": "SKIPPED",
-                "ai_executed": False,
-            }
-        ):
+        legacy_historical = {
+            "queue_id": 12,
+            "investigation_version": 1,
+            "status": "SKIPPED",
+            "ai_executed": False,
+        }
+
+        if generic:
+            if (
+                type(historical) is not dict
+                or set(historical) != set(legacy_historical)
+                or type(historical.get("queue_id")) is not int
+                or historical["queue_id"] < 1
+                or historical["queue_id"] == identity["queue_id"]
+                or type(historical.get("investigation_version"))
+                is not int
+                or historical["investigation_version"] < 1
+                or historical["investigation_version"] + 1
+                != identity["investigation_version"]
+                or historical.get("status") != "SKIPPED"
+                or historical.get("ai_executed") is not False
+            ):
+                raise ValueError("Generic historical control mismatch.")
+
+        elif historical != legacy_historical:
             raise ValueError("Controle historico divergente.")
 
         for field in (
@@ -153,7 +180,14 @@ class MemoryTraceRegistry:
         # anterior. Este registro nao recebe a analise original.
         return identity
 
-    def register(self, trace):
+    def register(
+        self,
+        trace,
+        *,
+        trusted_contract=None,
+        integrity_record=None,
+        expected_evidence_ids=None,
+    ):
         """
         Registra metadados validados somente em memoria.
 
@@ -163,7 +197,42 @@ class MemoryTraceRegistry:
         Uma identidade logica ou result_key com conteudo
         divergente provoca INTEGRITY_CONFLICT, sem sobrescrita.
         """
-        identity = self._validate(trace)
+        generic = any(
+            value is not None
+            for value in (
+                trusted_contract,
+                integrity_record,
+                expected_evidence_ids,
+            )
+        )
+
+        if generic:
+            if any(
+                value is None
+                for value in (
+                    trusted_contract,
+                    integrity_record,
+                    expected_evidence_ids,
+                )
+            ):
+                raise ValueError(
+                    "Generic registration requires complete trust inputs."
+                )
+
+            # Independently rebuild the expected trace using the
+            # official WF-05 contract and original SHA-256 record.
+            expected_trace = build_memory_traceability(
+                trusted_contract,
+                integrity_record,
+                expected_evidence_ids=expected_evidence_ids,
+            )
+
+            if trace != expected_trace:
+                raise ValueError(
+                    "Trace does not match independently verified input."
+                )
+
+        identity = self._validate(trace, generic=generic)
 
         logical_key = (
             identity["environment"],

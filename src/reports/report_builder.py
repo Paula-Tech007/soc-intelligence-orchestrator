@@ -19,7 +19,7 @@ def esc(value):
     return html.escape(str(value), quote=True)
 
 
-def validate_contract(contract):
+def validate_contract(contract, *, expected_evidence_ids=None):
 
     if not isinstance(contract, dict):
         raise ValueError("Contrato deve ser objeto JSON.")
@@ -97,16 +97,45 @@ def validate_contract(contract):
                 "Assinatura de conteudo invalida."
             )
 
-    if set(by_version) != {1, 2}:
-        raise ValueError(
-            "Fixture esperado: versoes 1 e 2."
-        )
+    generic = expected_evidence_ids is not None
 
-    historical = by_version[1]
-    current = by_version[2]
+    if generic:
+        if (
+            not isinstance(expected_evidence_ids, (list, tuple))
+            or not expected_evidence_ids
+            or not all(
+                isinstance(value, str) and bool(value.strip())
+                for value in expected_evidence_ids
+            )
+            or len(set(expected_evidence_ids))
+            != len(expected_evidence_ids)
+        ):
+            raise ValueError("Invalid trusted evidence allowlist.")
+
+        versions = sorted(by_version)
+
+        if (
+            versions[0] < 1
+            or versions[1] != versions[0] + 1
+        ):
+            raise ValueError("Invalid consecutive investigation versions.")
+
+        historical = by_version[versions[0]]
+        current = by_version[versions[1]]
+
+    else:
+        if set(by_version) != {1, 2}:
+            raise ValueError("Legacy fixture requires versions 1 and 2.")
+
+        historical = by_version[1]
+        current = by_version[2]
 
     if (
-        historical.get("queue_id") != 12
+        (
+            type(historical.get("queue_id")) is not int
+            or historical["queue_id"] < 1
+            or (not generic and historical["queue_id"] != 12)
+        )
         or historical.get("status") != "SKIPPED"
         or historical.get("ai_executed") is not False
         or historical.get("analysis") is not None
@@ -117,7 +146,12 @@ def validate_contract(contract):
         )
 
     if (
-        current.get("queue_id") != 13
+        (
+            type(current.get("queue_id")) is not int
+            or current["queue_id"] < 1
+            or current["queue_id"] == historical["queue_id"]
+            or (not generic and current["queue_id"] != 13)
+        )
         or current.get("status") != "ANALYSIS_COMPLETED"
         or current.get("ai_executed") is not True
         or current.get("requires_human_review") is not True
@@ -135,7 +169,7 @@ def validate_contract(contract):
                 f"Identidade da investigacao invalida: {field}"
             )
 
-    if current["source_event_id"] != "LAB-0001":
+    if not generic and current["source_event_id"] != "LAB-0001":
         raise ValueError(
             "Fixture nao corresponde ao evento LAB-0001."
         )
@@ -173,17 +207,17 @@ def validate_contract(contract):
                 f"Lista de analise invalida: {field}"
             )
 
-    if set(analysis["evidence_ids"]) != {
-        "LAB-EV-001", "LAB-EV-002"
-    }:
-        raise ValueError(
-            "Referencias de evidencias inesperadas."
-        )
+    required_evidence = (
+        set(expected_evidence_ids)
+        if generic
+        else {"LAB-EV-001", "LAB-EV-002"}
+    )
 
-    if len(analysis["evidence_ids"]) != 2:
-        raise ValueError(
-            "Referencias de evidencias duplicadas."
-        )
+    if (
+        set(analysis["evidence_ids"]) != required_evidence
+        or len(analysis["evidence_ids"]) != len(required_evidence)
+    ):
+        raise ValueError("Unexpected or duplicate evidence references.")
 
     return historical, current
 
@@ -199,9 +233,12 @@ def html_list(values):
     )
 
 
-def build_report(contract):
+def build_report(contract, *, expected_evidence_ids=None):
 
-    historical, current = validate_contract(contract)
+    historical, current = validate_contract(
+        contract,
+        expected_evidence_ids=expected_evidence_ids,
+    )
 
     analysis = current["analysis"]
 

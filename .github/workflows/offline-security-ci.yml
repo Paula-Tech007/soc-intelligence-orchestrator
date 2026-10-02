@@ -151,3 +151,31 @@ jobs:
             -s tests \
             -p "test_memory_trace_registry.py" \
             -v
+
+      - name: Run generic WF-05 contract tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_generic_wf05_contract.py" \
+            -v
+
+      - name: Run generic integrated MOCK report tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_generic_integrated_mock_report.py" \
+            -v
+
+      - name: Run generic memory traceability tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_generic_memory_traceability.py" \
+            -v
+
+      - name: Run generic memory registry tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_generic_memory_trace_registry.py" \
+            -v

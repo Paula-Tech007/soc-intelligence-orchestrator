@@ -73,6 +73,7 @@ def assemble_integrated_mock_contract(
     current_observed,
     *,
     historical_envelope,
+    current_envelope=None,
 ):
     """
     Prepara o contrato oficial WF-05 a partir de duas
@@ -81,9 +82,121 @@ def assemble_integrated_mock_contract(
     Nao transforma a versao historica em analise executada.
     """
 
+    generic = current_envelope is not None
+
+    expected_historical_queue = 12
+    expected_current_queue = 13
+    expected_historical_version = 1
+    expected_current_version = 2
+    trusted_evidence = None
+    current_context = None
+
+    if generic:
+        if (
+            not isinstance(historical_envelope, dict)
+            or not isinstance(current_envelope, dict)
+        ):
+            raise ValueError("Context envelopes required.")
+
+        historical_context = historical_envelope.get("context")
+        current_context = current_envelope.get("context")
+
+        if (
+            not isinstance(historical_context, dict)
+            or not isinstance(current_context, dict)
+        ):
+            raise ValueError("Investigation contexts missing.")
+
+        historical_gate = evaluate_context(historical_envelope)
+        current_gate = evaluate_context(current_envelope)
+
+        if (
+            historical_gate.get("decision") != "HISTORICAL_CONTEXT"
+            or current_gate.get("decision") != "READY_FOR_AI_REVIEW"
+        ):
+            raise ValueError("Invalid historical/current gate pairing.")
+
+        expected_historical_queue = historical_context.get("queue_id")
+        expected_current_queue = current_context.get("queue_id")
+
+        expected_historical_version = historical_context.get(
+            "requested_version"
+        )
+        expected_current_version = current_context.get(
+            "requested_version"
+        )
+
+        if (
+            type(expected_historical_queue) is not int
+            or type(expected_current_queue) is not int
+            or expected_historical_queue < 1
+            or expected_current_queue < 1
+            or expected_historical_queue == expected_current_queue
+            or historical_gate.get("queue_id")
+            != expected_historical_queue
+            or current_gate.get("queue_id")
+            != expected_current_queue
+            or type(expected_historical_version) is not int
+            or type(expected_current_version) is not int
+            or expected_current_version
+            != expected_historical_version + 1
+            or historical_context.get("current_version")
+            != expected_current_version
+            or current_context.get("current_version")
+            != expected_current_version
+        ):
+            raise ValueError("Investigation version or queue mismatch.")
+
+        for field in ("investigation_id", "source_event_id"):
+            value = historical_context.get(field)
+
+            if (
+                not isinstance(value, str)
+                or not value.strip()
+                or value != current_context.get(field)
+            ):
+                raise ValueError("Investigation identity mismatch.")
+
+        event = current_context.get("event")
+
+        if (
+            not isinstance(event, dict)
+            or event.get("source_event_id")
+            != current_context["source_event_id"]
+        ):
+            raise ValueError("Current event identity mismatch.")
+
+        evidence = event.get("evidence")
+
+        if not isinstance(evidence, list) or not evidence:
+            raise ValueError("Trusted evidence missing.")
+
+        trusted_evidence = []
+
+        for item in evidence:
+            if not isinstance(item, dict):
+                raise ValueError("Invalid trusted evidence.")
+
+            evidence_id = item.get("evidence_id")
+
+            if (
+                not isinstance(evidence_id, str)
+                or not evidence_id.strip()
+            ):
+                raise ValueError("Invalid trusted evidence ID.")
+
+            trusted_evidence.append(evidence_id)
+
+        if (
+            len(set(trusted_evidence)) != len(trusted_evidence)
+            or current_context.get("evidence_count")
+            != len(trusted_evidence)
+        ):
+            raise ValueError("Trusted evidence count mismatch.")
+
     historical = _observed_result(
         historical_observed,
-        12,
+        expected_historical_queue,
         "HISTORICAL_CONTEXT",
         "HISTORICAL_SKIPPED",
         "NOT_APPLICABLE",
@@ -91,7 +204,7 @@ def assemble_integrated_mock_contract(
 
     current = _observed_result(
         current_observed,
-        13,
+        expected_current_queue,
         "READY_FOR_AI_REVIEW",
         "MOCK_ANALYSIS_COMPLETED",
         "VERIFIED_IN_MEMORY",
@@ -112,7 +225,7 @@ def assemble_integrated_mock_contract(
 
     if (
         gate.get("decision") != "HISTORICAL_CONTEXT"
-        or gate.get("queue_id") != 12
+        or gate.get("queue_id") != expected_historical_queue
     ):
         raise ValueError("Contexto historico nao confirmado.")
 
@@ -122,8 +235,10 @@ def assemble_integrated_mock_contract(
         raise ValueError("Contexto historico ausente.")
 
     if (
-        context.get("requested_version") != 1
-        or context.get("current_version") != 2
+        context.get("requested_version")
+        != expected_historical_version
+        or context.get("current_version")
+        != expected_current_version
         or context.get("is_historical_version") is not True
         or context.get("ai_executed") is not False
         or context.get("notification_sent") is not False
@@ -138,8 +253,9 @@ def assemble_integrated_mock_contract(
         raise ValueError("Analise ou integridade ausente.")
 
     if (
-        wf04.get("queue_id") != 13
-        or wf04.get("investigation_version") != 2
+        wf04.get("queue_id") != expected_current_queue
+        or wf04.get("investigation_version")
+        != expected_current_version
         or wf04.get("status") != "ANALYSIS_COMPLETED"
         or wf04.get("real_ollama_call") is not False
         or wf04.get("ready_for_operational_dispatch") is not False
@@ -166,14 +282,27 @@ def assemble_integrated_mock_contract(
         if context.get(field) != wf04.get(field):
             raise ValueError("Identidade historica divergente.")
 
+    if generic:
+        if (
+            current_context["investigation_id"]
+            != wf04.get("investigation_id")
+            or current_context["source_event_id"]
+            != wf04.get("source_event_id")
+            or current_context.get("provenance")
+            != wf04.get("provenance")
+        ):
+            raise ValueError(
+                "Current context and signed WF-04 result diverge."
+            )
+
     historical_item = {
         "schema_version": "1.0",
         "environment": "LAB",
         "processor": "WF-04",
         "investigation_id": context["investigation_id"],
         "source_event_id": context["source_event_id"],
-        "investigation_version": 1,
-        "queue_id": 12,
+        "investigation_version": expected_historical_version,
+        "queue_id": expected_historical_queue,
         "status": "SKIPPED",
         "reason": "Contexto nao elegivel para IA.",
         "analysis": None,
@@ -202,7 +331,10 @@ def assemble_integrated_mock_contract(
 
     # O validador oficial permanece sendo a autoridade
     # para a estrutura exigida pelo gerador WF-05.
-    validate_contract(contract)
+    validate_contract(
+        contract,
+        expected_evidence_ids=trusted_evidence,
+    )
 
     return contract
 
@@ -212,6 +344,7 @@ def build_integrated_mock_report(
     current_observed,
     *,
     historical_envelope,
+    current_envelope=None,
 ):
     """Gera HTML em memoria somente apos a validacao oficial."""
 
@@ -219,9 +352,21 @@ def build_integrated_mock_report(
         historical_observed,
         current_observed,
         historical_envelope=historical_envelope,
+        current_envelope=current_envelope,
     )
 
-    html = build_report(contract)
+    trusted_evidence = None
+
+    if current_envelope is not None:
+        trusted_evidence = [
+            item["evidence_id"]
+            for item in current_envelope["context"]["event"]["evidence"]
+        ]
+
+    html = build_report(
+        contract,
+        expected_evidence_ids=trusted_evidence,
+    )
 
     return {
         "schema_version": "1.0",

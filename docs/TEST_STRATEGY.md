@@ -3,14 +3,16 @@
 ## Baseline
 
 Commit: e71d81c.
-CI homologado: 14 suites, 138 testes offline.
+CI da baseline anterior: 14 suites, 138 testes offline.
+Etapa 18: 18 suites e 180 testes aprovados localmente.
+A validacao remota do CI ampliado permanece pendente.
 
 ## Inventario Python
 
-- Arquivos Python test_*.py: 36.
-- Arquivos contemplados por padroes do CI: 15.
+- Arquivos Python test_*.py: 40.
+- Arquivos contemplados por padroes do CI: 19.
 - Arquivos fora dos padroes do CI: 21.
-- Ha 14 padroes no CI; test_bridge_*.py contempla dois arquivos.
+- Ha 18 padroes no CI; test_bridge_*.py contempla dois arquivos.
 
 Testes procedurais com main() nao sao necessariamente
 descobertos pelo unittest discover.
@@ -33,6 +35,29 @@ descobertos pelo unittest discover.
 | test_integrated_mock_report.py |
 | test_memory_traceability.py |
 | test_memory_trace_registry.py |
+| test_generic_wf05_contract.py |
+| test_generic_integrated_mock_report.py |
+| test_generic_memory_traceability.py |
+| test_generic_memory_trace_registry.py |
+
+## Etapa 18 - Contratos genericos LAB/MOCK
+
+Quatro suites offline adicionais: 42 testes.
+
+- WF-05 generico: 12.
+- Adaptador integrado generico: 12.
+- Rastreabilidade generica: 8.
+- Registro temporario generico: 10.
+
+Regressao local consolidada: 138 + 42 = 180
+testes unittest aprovados.
+
+O teste procedural legado do WF-05 foi executado
+separadamente, com sete verificacoes aprovadas.
+
+O novo percurso exige contexto e evidencias confiaveis,
+integridade SHA-256 e revisao humana. Nao constitui
+validacao contra PostgreSQL ou execucao real de Ollama.
 
 ## Oito candidatos a testes offline adicionais
 
@@ -88,8 +113,8 @@ Eles nao comprovam, isoladamente, acesso real a servicos.
 
 O repositorio tambem possui testes JavaScript, fixtures,
 scripts auxiliares e testes de integracao local.
-Eles nao integram automaticamente o conjunto de 138
-testes Python do CI.
+Eles nao integram automaticamente o conjunto de 180
+testes Python planejado para o CI ampliado.
 
 ## Criterios para ampliar o CI
 

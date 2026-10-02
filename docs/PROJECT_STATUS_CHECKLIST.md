@@ -13,6 +13,9 @@ Legenda:
 
 ## Inventario
 
+Fotografia da consolidacao da Etapa 17.
+A Etapa 18 acrescenta quatro arquivos de teste.
+
 | Categoria | Quantidade |
 |---|---:|
 | Arquivos versionados | 116 |
@@ -42,10 +45,10 @@ Legenda:
 | Observabilidade - Etapa 14 | Implementada e homologada offline |
 | Adaptador de relatorio - Etapa 15 | Implementado e homologado offline |
 | Rastreabilidade em memoria - Etapa 16 | Implementada e homologada offline |
-| GitHub Actions | 14 suites aprovadas |
+| GitHub Actions | 14 suites anteriores aprovadas; ampliacao para 18 pendente de execucao remota |
 | Integracao dinamica com E2E remoto | Pendente |
 | Ollama real no E2E remoto | Pendente |
-| Contratos para multiplas investigacoes | Pendente |
+| Contratos para multiplas investigacoes | Homologados offline em LAB/MOCK; integracao real pendente |
 | Demonstracao final reproduzivel | Em evolucao |
 
 ## Etapa 17 - Consolidacao arquitetural
@@ -59,9 +62,23 @@ Legenda:
 - [x] 17.6 Commit e verificacao de escopo.
 - [x] 17.7 Publicacao apos aprovacao.
 
+## Etapa 18 - Generalizacao de contratos LAB/MOCK
+
+- [x] 18.1 Auditoria dos contratos fixos.
+- [x] 18.2 Regressao inicial de referencia.
+- [x] 18.3 WF-05 parametrizavel.
+- [x] 18.4 Regressao das Etapas 15 e 16.
+- [x] 18.5A Adaptador integrado generico.
+- [x] 18.5B Segundo cenario sintetico integrado.
+- [x] 18.6A Rastreabilidade generica.
+- [x] 18.6B Registro temporario generico.
+- [x] 18.7 Homologacao local: 180 testes e 7 checks.
+- [x] 18.8 Inclusao das quatro suites na configuracao de CI.
+- [ ] 18.9 Publicacao direta na main.
+- [ ] 18.10 Confirmacao do CI remoto ampliado.
+
 ## Proximos marcos propostos
 
-- Etapa 18: generalizacao de contratos com cenarios sinteticos.
 - Etapa 19: consolidacao da integracao Python local.
 - Etapa 20: evolucao assistiva de IA local.
 - Etapa 21: testes de integracao ampliados e homologacao.

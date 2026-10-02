@@ -24,7 +24,12 @@ class MemoryTraceabilityError(ValueError):
     """Contrato de rastreabilidade ausente ou divergente."""
 
 
-def build_memory_traceability(contract, integrity_record):
+def build_memory_traceability(
+    contract,
+    integrity_record,
+    *,
+    expected_evidence_ids=None,
+):
     """
     Constroi metadados auditaveis sem persistencia.
 
@@ -43,7 +48,10 @@ def build_memory_traceability(contract, integrity_record):
         )
 
     try:
-        historical, current = validate_contract(contract)
+        historical, current = validate_contract(
+            contract,
+            expected_evidence_ids=expected_evidence_ids,
+        )
     except (ValueError, KeyError, TypeError) as exc:
         raise MemoryTraceabilityError(
             "Contrato WF-05 invalido."
