@@ -252,3 +252,53 @@ foi homologada separadamente nas etapas anteriores.
 
 O servico permanece exclusivo do LAB local, vinculado
 a `127.0.0.1`, sem despacho operacional.
+---
+
+## Etapa 06.9 - Inicializador seguro da ponte local
+
+Status: homologado.
+
+Arquivo: `scripts/start-local-bridge.ps1`.
+
+### Inicializacao
+
+No PowerShell, a partir da raiz do projeto:
+
+```powershell
+.\scripts\start-local-bridge.ps1
+```
+
+O inicializador:
+
+- recupera as credenciais DB e HTTP protegidas por DPAPI;
+- nao apresenta as credenciais no terminal;
+- verifica se a porta 8765 ja esta em uso;
+- inicia o Uvicorn exclusivamente em `127.0.0.1`;
+- configura um unico worker;
+- estabelece `--limit-concurrency 10`;
+- estabelece `--timeout-keep-alive 5`;
+- desabilita access log e Server header;
+- utiliza um bloco `finally` para limpar as variaveis
+  temporarias do processo PowerShell.
+
+### Encerramento
+
+Com o servidor em primeiro plano, pressionar `Ctrl+C`.
+
+A homologacao confirmou:
+
+1. Application shutdown complete.
+2. Finished server process.
+3. Credenciais temporarias removidas.
+4. Porta 8765 liberada apos o encerramento.
+
+### Restricoes
+
+O limite de concorrencia nao substitui um mecanismo
+de rate limiting por cliente.
+
+A ponte permanece exclusiva do LAB local, sem
+publicacao externa, notificacoes operacionais ou
+integracao ao n8n corporativo.
+
+O workflow E2E continua em modo MOCK_SNAPSHOT.
