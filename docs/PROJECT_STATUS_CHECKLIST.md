@@ -57,7 +57,7 @@ Legenda:
 - [x] 17.4 Atualizacao do README.
 - [x] 17.5 Revisao de consistencia e regressao documental.
 - [x] 17.6 Commit e verificacao de escopo.
-- [ ] 17.7 Publicacao apos aprovacao.
+- [x] 17.7 Publicacao apos aprovacao.
 
 ## Proximos marcos propostos
 
