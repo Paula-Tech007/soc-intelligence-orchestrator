@@ -2,7 +2,7 @@
 
 ## Referencia
 
-- Baseline: main, commit e71d81c.
+- Baseline funcional: main, commit f2feb8e.
 - Ambiente: laboratorio defensivo com dados sinteticos.
 - Objetivo: apoiar a triagem SOC N1, reduzindo retrabalho por meio de
   deduplicacao, contexto, analise assistiva e rastreabilidade.
@@ -85,11 +85,27 @@ Nao confundir VERIFIED_IN_MEMORY com verificacao PostgreSQL.
 6. Manter revisao humana e despacho operacional bloqueado.
 7. Nao expor a ponte HTTP local publicamente.
 
+## Entrega Python integrada - Etapa 19
+
+O modulo `src/context/local_mock_composer.py` reutiliza
+os contratos existentes em uma chamada LAB/MOCK.
+
+Processa a versao historica e a vigente, gera revisao
+simulada, integridade SHA-256 em memoria, HTML WF-05
+e registro temporario idempotente.
+
+Demonstrador: `scripts/demo-local-mock.py`.
+CI remoto: 19 suites, 186/186 testes, run 37032159353.
+
+A demonstracao utiliza snapshots exportados e nao realiza
+nova consulta PostgreSQL, chamada real ao Ollama,
+persistencia ou despacho operacional.
+
 ## Pontos ainda nao integrados
 
 - Integracao dinamica do n8n remoto com a camada Python local.
 - Execucao do Ollama no percurso E2E do n8n.
-- Generalizacao dos contratos para investigacoes arbitrarias.
+- Contratos genericos LAB/MOCK concluidos na Etapa 18; adaptacao ao percurso dinamico ainda pendente.
 - Homologacao consolidada de todos os percursos em um runtime unico.
 
 Qualquer integracao externa depende de ambiente autorizado e

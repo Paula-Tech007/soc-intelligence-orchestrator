@@ -2,7 +2,8 @@
 
 ## Referencia
 
-Baseline auditada: e71d81c.
+Baseline funcional: f2feb8e.
+CI remoto: execucao 37032159353, SUCCESS, 186/186.
 
 Legenda:
 - IMPLEMENTADO: componente existe no repositorio.
@@ -11,20 +12,22 @@ Legenda:
 - INTEGRADO MOCK: participa de pipeline demonstrativo.
 - PENDENTE: entrega ainda nao concluida no escopo indicado.
 
-## Inventario
+## Inventario vigente
 
-Fotografia da consolidacao da Etapa 17.
-A Etapa 18 acrescenta quatro arquivos de teste.
+Referencia: Etapa 19, commit `f2feb8e`.
 
 | Categoria | Quantidade |
 |---|---:|
-| Arquivos versionados | 116 |
+| Arquivos versionados | 126 |
 | Workflows n8n | 15 |
-| Arquivos em src/ | 30 |
-| Arquivos em tests/ | 49 |
-| Documentos Markdown em docs/ | 9 |
+| Arquivos em src/ | 31 |
+| Arquivos em tests/ | 54 |
+| Arquivos Python test_*.py | 41 |
+| Documentos Markdown em docs/ | 12 |
 | Arquivos SQL | 2 |
-| Scripts auxiliares | 2 |
+| Scripts auxiliares | 3 |
+
+Inventarios antigos permanecem no historico Git.
 
 ## Checklist de componentes
 
@@ -45,11 +48,11 @@ A Etapa 18 acrescenta quatro arquivos de teste.
 | Observabilidade - Etapa 14 | Implementada e homologada offline |
 | Adaptador de relatorio - Etapa 15 | Implementado e homologado offline |
 | Rastreabilidade em memoria - Etapa 16 | Implementada e homologada offline |
-| GitHub Actions | 14 suites anteriores aprovadas; ampliacao para 18 pendente de execucao remota |
+| GitHub Actions | 19 suites; 186/186 testes remotos aprovados |
 | Integracao dinamica com E2E remoto | Pendente |
 | Ollama real no E2E remoto | Pendente |
 | Contratos para multiplas investigacoes | Homologados offline em LAB/MOCK; integracao real pendente |
-| Demonstracao final reproduzivel | Em evolucao |
+| Demonstracao final reproduzivel | Demo Python LAB/MOCK aprovada; E2E dinamico e release final pendentes |
 
 ## Etapa 17 - Consolidacao arquitetural
 
@@ -94,8 +97,8 @@ A Etapa 18 acrescenta quatro arquivos de teste.
 A Etapa 18 fica concluida quanto aos contratos genericos
 e sua regressao offline.
 
-A proxima atividade e a Etapa 19, consolidacao da
-integracao Python local.
+A Etapa 19 consolidou o executor Python LAB/MOCK.
+A continuidade segue as fases originais 08, 09 e 11.
 
 ## Etapa 19 - Integracao Python local
 
@@ -106,16 +109,29 @@ integracao Python local.
 - [x] Seis testes novos aprovados localmente.
 - [x] Demonstrador executavel validado.
 - [x] Nova suite incluida na configuracao de CI.
-- [ ] Regressao consolidada: 186 testes.
-- [ ] Publicacao direta na main.
-- [ ] Confirmacao do GitHub Actions remoto.
+- [x] Regressao consolidada: 186 testes.
+- [x] Publicacao direta na main.
+- [x] Confirmacao do GitHub Actions remoto.
 
-## Proximos marcos propostos
+## Governanca das proximas entregas
 
-- Etapa 19: consolidacao da integracao Python local.
-- Etapa 20: evolucao assistiva de IA local.
-- Etapa 21: testes de integracao ampliados e homologacao.
-- Etapa 22: demonstracao de portfolio.
+- README, secao 12: roteiro oficial, preservando as 15 fases.
+- Este checklist: estado operacional de cada entrega.
+- ARCHITECTURE_BASELINE.md: integracoes vigentes e limites.
+- TEST_STRATEGY.md: evidencias e cobertura de testes.
+- Atualizar este checklist no mesmo commit da implementacao.
+- Nao confundir teste MOCK com homologacao dinamica.
+- Reutilizar componentes existentes antes de criar outros.
 
-Os marcos futuros nao estao automaticamente autorizados
-para acesso a servicos corporativos ou exposicao da API local.
+## Caminho critico para a conclusao
+
+- [ ] Fase 08: PostgreSQL dinamico conectado ao n8n LAB.
+- [ ] Fase 09: Ollama conectado ao percurso E2E autorizado.
+- [ ] Homologacao dinamica WF-00 ate WF-05.
+- [ ] Observabilidade consolidada no percurso final.
+- [ ] Instalacao reproduzivel e migracoes documentadas.
+- [ ] Fase 11: demonstracao, evidencias e release de portfolio.
+
+Integracao externa depende de transporte seguro e autorizacao.
+Revisao humana permanece obrigatoria.
+Despacho operacional e notificacoes reais desabilitados.

@@ -356,7 +356,7 @@ O resultado completo também contém o campo `html`, com o relatório técnico p
 
 # ◈ 08. ESTRUTURA DO REPOSITÓRIO
 
-Inventario da Etapa 17: **119 arquivos versionados**. A Etapa 18 acrescenta quatro arquivos de testes, totalizando **123 arquivos previstos apos publicacao**.
+Inventario vigente: **126 arquivos versionados**, conforme a Etapa 19 (`f2feb8e`). Inventarios anteriores permanecem no historico Git.
 
 A arvore abaixo foi gerada a partir do inventario Git.
 
@@ -387,6 +387,7 @@ soc-intelligence-orchestrator/
 |   +-- LAB-0001/
 |       +-- SOC-LAB-0001-V2-MOCK.html
 |-- scripts/
+|   |-- demo-local-mock.py
 |   |-- run-local-integrated-regression.ps1
 |   +-- start-local-bridge.ps1
 |-- src/
@@ -413,6 +414,7 @@ soc-intelligence-orchestrator/
 |   |   |-- integrated_mock_pipeline.py
 |   |   |-- local_decision_pipeline.py
 |   |   |-- local_http_client.py
+|   |   |-- local_mock_composer.py
 |   |   +-- wf02_wf03_bridge.py
 |   |-- dedup/
 |   |   +-- persistence.py
@@ -463,6 +465,7 @@ soc-intelligence-orchestrator/
 |   |-- test_integrity_persistence_live.py
 |   |-- test_local_decision_pipeline.py
 |   |-- test_local_http_client.py
+|   |-- test_local_mock_composer.py
 |   |-- test_memory_trace_registry.py
 |   |-- test_memory_traceability.py
 |   |-- test_observability_collector.py
@@ -743,7 +746,7 @@ O projeto foi estruturado para evoluir de um laboratório controlado para uma ar
 | **04 — Intelligence Layer** | Motor Python, cache e contratos de IA. | ✅ Implementado |
 | **05 — Integrity Layer** | Assinaturas, idempotência e validação persistente. | ✅ Implementado |
 | **06 — Reporting** | HTML estruturado e revisão humana. | ✅ Concluído no LAB |
-| **07 — E2E Integration** | Workflow integrado com 20 nós. | ✅ Homologado |
+| **07 — E2E Integration** | Workflow integrado com 20 nós. | LAB/MOCK homologado; integracao dinamica pendente |
 | **08 — Runtime Database** | Integrar PostgreSQL dinamicamente ao n8n. | ⬜ Planejado |
 | **09 — Runtime AI** | Conectar Ollama ao fluxo E2E. | ⬜ Planejado |
 | **10 - Observability** | Telemetria sanitizada e rastreabilidade em memoria. | Homologado offline (Etapas 14 e 16) |
@@ -751,17 +754,38 @@ O projeto foi estruturado para evoluir de um laboratório controlado para uma ar
 | **12 - MOCK Reporting Integration** | Pipeline observado integrado ao WF-05. | Etapa 15 homologada |
 | **13 - Memory Traceability** | Identidade SHA-256 e controle temporario de conflitos. | Etapa 16 homologada |
 | **14 - Architecture Consolidation** | Inventario, responsabilidades, checklist e testes. | Etapa 17 concluida |
-| **15 - Generic LAB Contracts** | WF-05, adaptador MOCK e rastreabilidade parametrizaveis. | Etapa 18 homologada localmente; CI remoto pendente |
+| **15 - Generic LAB Contracts** | WF-05, adaptador MOCK e rastreabilidade parametrizaveis. | Etapa 18 concluida; CI remoto 180/180 aprovado |
 
-### Documentos centrais da Etapa 17
+### Entrega tecnica da Etapa 19
+
+O modulo `src/context/local_mock_composer.py` executa uma
+investigacao sintetica em uma unica chamada, reutilizando
+Decision Gate, revisao MOCK, integridade SHA-256, WF-05
+e rastreabilidade temporaria em memoria.
+
+Demonstracao local (PowerShell):
+
+```powershell
+.\.venv\Scripts\python.exe scripts/demo-local-mock.py
+```
+
+A demonstracao grava o HTML WF-05 na pasta temporaria e
+verifica repeticao idempotente com cache. Nao consulta
+PostgreSQL, nao executa Ollama real e nao realiza despacho
+operacional. O campo de origem da fixture indica um snapshot
+exportado, nao uma consulta de banco nesta execucao.
+
+CI remoto: execucao `37032159353`, SUCCESS, **19 suites e 186/186 testes aprovados**.
+
+### Documentos de governanca
 
 - [Architecture Baseline](docs/ARCHITECTURE_BASELINE.md): arquitetura e responsabilidades.
 - [Project Status Checklist](docs/PROJECT_STATUS_CHECKLIST.md): estado das entregas e pendencias.
 - [Test Strategy](docs/TEST_STRATEGY.md): cobertura e classificacao dos testes.
 
-**Baseline:** `e71d81c`.
+**Baseline funcional:** `f2feb8e`.
 
-GitHub Actions: baseline anterior com 14 suites e 138 testes. Etapa 18 com 18 suites e 180 testes unittest aprovados localmente, alem de sete verificacoes procedurais legadas. A execucao remota do CI ampliado e a integracao dinamica do E2E permanecem pendentes.
+GitHub Actions: **19 suites e 186/186 testes aprovados remotamente**. Integracao dinamica ainda pendente nas fases 08 e 09.
 
 ---
 
@@ -888,23 +912,3 @@ Desenvolvimento de soluções envolvendo automação de processos, orquestraçã
 **© Paula Sabino**
 
 </div>
-
-
-## Etapa 19 - Pipeline Python integrado LAB/MOCK
-
-O modulo `src/context/local_mock_composer.py` executa uma
-investigacao sintetica em uma unica chamada, reutilizando
-Decision Gate, revisao MOCK, integridade SHA-256, WF-05
-e rastreabilidade temporaria em memoria.
-
-Demonstracao local (PowerShell):
-
-```powershell
-.\.venv\Scripts\python.exe scripts/demo-local-mock.py
-```
-
-A demonstracao grava o HTML WF-05 na pasta temporaria e
-verifica repeticao idempotente com cache. Nao consulta
-PostgreSQL, nao executa Ollama real e nao realiza despacho
-operacional. O campo de origem da fixture indica um snapshot
-exportado, nao uma consulta de banco nesta execucao.

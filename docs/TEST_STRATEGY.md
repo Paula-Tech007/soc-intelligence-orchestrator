@@ -1,22 +1,23 @@
 # Test Strategy - SOC Intelligence Orchestrator
 
-## Baseline
+## Baseline vigente
 
-Commit: e71d81c.
-CI da baseline anterior: 14 suites, 138 testes offline.
-Etapa 18: 18 suites e 180 testes aprovados localmente.
-Etapa 18: CI remoto aprovado, 180/180 testes.
-Etapa 19: ampliacao proposta para 19 suites e 186 testes.
+Commit: `f2feb8e`.
+GitHub Actions: execucao `37032159353`, SUCCESS.
+Python 3.12: **19 suites e 186/186 testes aprovados remotamente**.
+
+Historico:
+- Etapa 17: 14 suites, 138 testes.
+- Etapa 18: 18 suites, 180 testes.
+- Etapa 19: 19 suites, 186 testes.
 
 ## Inventario Python
 
-- Arquivos Python test_*.py: 40.
-- Arquivos contemplados por padroes do CI: 19.
+- Arquivos test_*.py: 41.
+- Arquivos contemplados pelo CI: 20.
 - Arquivos fora dos padroes do CI: 21.
-- Ha 18 padroes no CI; test_bridge_*.py contempla dois arquivos.
-
-Testes procedurais com main() nao sao necessariamente
-descobertos pelo unittest discover.
+- Padroes do CI: 19 (bridge contempla dois arquivos).
+- Testes procedurais podem exigir execucao separada.
 
 ## Suites presentes no GitHub Actions
 
@@ -64,13 +65,13 @@ validacao contra PostgreSQL ou execucao real de Ollama.
 ## Etapa 19 - Executor Python LAB/MOCK
 
 - Nova suite: test_local_mock_composer.py (6 testes).
-- Total previsto: 19 suites e 186 testes unittest.
+- Total homologado: 19 suites e 186 testes unittest.
 - Demonstrador: scripts/demo-local-mock.py.
 - Saida: HTML WF-05 na pasta temporaria.
 - Cache e registro temporario validados na repeticao.
 - Contextos provenientes de fixture sintetica exportada.
 - Sem nova consulta PostgreSQL ou chamada Ollama real.
-- Confirmacao do CI remoto pendente de publicacao.
+- CI remoto aprovado: execucao 37032159353.
 
 ## Oito candidatos a testes offline adicionais
 
@@ -126,8 +127,8 @@ Eles nao comprovam, isoladamente, acesso real a servicos.
 
 O repositorio tambem possui testes JavaScript, fixtures,
 scripts auxiliares e testes de integracao local.
-Eles nao integram automaticamente o conjunto de 180
-testes Python planejado para o CI ampliado.
+Eles nao integram automaticamente o conjunto oficial
+de 186 testes Python do CI vigente.
 
 ## Criterios para ampliar o CI
 
