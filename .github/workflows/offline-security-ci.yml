@@ -137,3 +137,17 @@ jobs:
             -s tests \
             -p "test_integrated_mock_report.py" \
             -v
+
+      - name: Run memory traceability tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_memory_traceability.py" \
+            -v
+
+      - name: Run memory trace registry tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_memory_trace_registry.py" \
+            -v
