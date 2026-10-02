@@ -42,6 +42,7 @@ Historico:
 | test_generic_memory_traceability.py |
 | test_generic_memory_trace_registry.py |
 | test_local_mock_composer.py |
+| test_local_runtime_composer.py |
 
 ## Etapa 18 - Contratos genericos LAB/MOCK
 
@@ -72,6 +73,25 @@ validacao contra PostgreSQL ou execucao real de Ollama.
 - Contextos provenientes de fixture sintetica exportada.
 - Sem nova consulta PostgreSQL ou chamada Ollama real.
 - CI remoto aprovado: execucao 37032159353.
+
+## Fase 08 - Runtime Database local
+
+- Nova suite offline: test_local_runtime_composer.py (6 testes).
+- Homologacao com FastAPI/PostgreSQL real: aprovada no LAB.
+- Teste protegido: tests/local_runtime_regression.py.
+- Runner: scripts/run-local-integrated-regression.ps1.
+- Proxima meta CI: 20 suites e 192 testes.
+- Aprovacao remota dessa ampliacao: pendente.
+
+Inventario previsto apos publicacao:
+- Arquivos Python test_*.py: 42.
+- Arquivos cobertos pelos padroes do CI: 21.
+- Arquivos test_*.py fora do CI: 21.
+- Regressao local opcional fora do CI offline.
+
+Esta homologacao comprova consulta dinamica do contexto.
+A integridade da analise permanece em memoria e o WF-04
+utiliza modelo MOCK, sem Ollama real.
 
 ## Oito candidatos a testes offline adicionais
 

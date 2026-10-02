@@ -12,7 +12,7 @@ Legenda:
 - INTEGRADO MOCK: participa de pipeline demonstrativo.
 - PENDENTE: entrega ainda nao concluida no escopo indicado.
 
-## Inventario vigente
+## Inventario vigente e incremento em homologacao
 
 Referencia: Etapa 19, commit `f2feb8e`.
 
@@ -29,6 +29,8 @@ Referencia: Etapa 19, commit `f2feb8e`.
 
 Inventarios antigos permanecem no historico Git.
 
+Incremento local da Fase 08 em branch: tres arquivos novos. Total previsto apos publicacao: 129 arquivos.
+
 ## Checklist de componentes
 
 | Entrega | Situacao |
@@ -38,6 +40,7 @@ Inventarios antigos permanecem no historico Git.
 | WF-02 e versionamento investigativo | Implementados e testados |
 | PostgreSQL LAB | Implementado; homologacoes locais registradas |
 | FastAPI autenticada | Homologada localmente |
+| Consumidor dinamico Fase 08 | Homologado no LAB Python; integracao corporativa pendente |
 | Contexto e Decision Gate | Implementados e testados |
 | WF-04 com analise MOCK | Integrado ao pipeline Python |
 | Motor Ollama local | Implementacao independente |
@@ -122,6 +125,20 @@ A continuidade segue as fases originais 08, 09 e 11.
 - Atualizar este checklist no mesmo commit da implementacao.
 - Nao confundir teste MOCK com homologacao dinamica.
 - Reutilizar componentes existentes antes de criar outros.
+
+## Fase 08 - Runtime Database
+
+- [x] Reutilizar PostgreSQL e FastAPI autenticada existentes.
+- [x] Implementar consumidor dinamico sem segunda ponte.
+- [x] Aprovar seis testes offline do consumidor.
+- [x] Homologar a consulta real das queues 12 e 13.
+- [x] Validar bloqueio historico e geracao do HTML WF-05.
+- [x] Validar cache e idempotencia no LAB.
+- [x] Registrar teste dinamico reproduzivel.
+- [x] Preparar runner DPAPI e ampliacao do CI.
+- [ ] Confirmar GitHub Actions remoto com 192/192 testes.
+- [ ] Definir conectividade aprovada para n8n corporativo.
+- [ ] Homologar integracao dinamica no workflow E2E n8n.
 
 ## Caminho critico para a conclusao
 

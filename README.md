@@ -356,7 +356,7 @@ O resultado completo também contém o campo `html`, com o relatório técnico p
 
 # ◈ 08. ESTRUTURA DO REPOSITÓRIO
 
-Inventario vigente: **126 arquivos versionados**, conforme a Etapa 19 (`f2feb8e`). Inventarios anteriores permanecem no historico Git.
+Inventario previsto com a entrega local da Fase 08: **129 arquivos versionados**, conforme a Etapa 19 (`f2feb8e`). Inventarios anteriores permanecem no historico Git.
 
 A arvore abaixo foi gerada a partir do inventario Git.
 
@@ -415,6 +415,7 @@ soc-intelligence-orchestrator/
 |   |   |-- local_decision_pipeline.py
 |   |   |-- local_http_client.py
 |   |   |-- local_mock_composer.py
+|   |   |-- local_runtime_composer.py
 |   |   +-- wf02_wf03_bridge.py
 |   |-- dedup/
 |   |   +-- persistence.py
@@ -442,6 +443,7 @@ soc-intelligence-orchestrator/
 |   |-- export_wf04_contract.py
 |   |-- import_wf01_output.ps1
 |   |-- local_integrated_regression.py
+|   |-- local_runtime_regression.py
 |   |-- test_ai_cache.py
 |   |-- test_ai_engine.py
 |   |-- test_ai_engine_live.py
@@ -466,6 +468,7 @@ soc-intelligence-orchestrator/
 |   |-- test_local_decision_pipeline.py
 |   |-- test_local_http_client.py
 |   |-- test_local_mock_composer.py
+|   |-- test_local_runtime_composer.py
 |   |-- test_memory_trace_registry.py
 |   |-- test_memory_traceability.py
 |   |-- test_observability_collector.py
@@ -747,7 +750,7 @@ O projeto foi estruturado para evoluir de um laboratório controlado para uma ar
 | **05 — Integrity Layer** | Assinaturas, idempotência e validação persistente. | ✅ Implementado |
 | **06 — Reporting** | HTML estruturado e revisão humana. | ✅ Concluído no LAB |
 | **07 — E2E Integration** | Workflow integrado com 20 nós. | LAB/MOCK homologado; integracao dinamica pendente |
-| **08 — Runtime Database** | Integrar PostgreSQL dinamicamente ao n8n. | ⬜ Planejado |
+| **08 — Runtime Database** | Integrar PostgreSQL dinamicamente ao n8n. | LAB Python dinamico homologado; integracao ao n8n corporativo pendente |
 | **09 — Runtime AI** | Conectar Ollama ao fluxo E2E. | ⬜ Planejado |
 | **10 - Observability** | Telemetria sanitizada e rastreabilidade em memoria. | Homologado offline (Etapas 14 e 16) |
 | **11 — Portfolio Release** | Demonstração reproduzível e evidências visuais. | ⬜ Em evolução |
@@ -776,6 +779,38 @@ operacional. O campo de origem da fixture indica um snapshot
 exportado, nao uma consulta de banco nesta execucao.
 
 CI remoto: execucao `37032159353`, SUCCESS, **19 suites e 186/186 testes aprovados**.
+
+### Fase 08 - Runtime Database local
+
+O modulo `src/context/local_runtime_composer.py` consome
+contextos PostgreSQL por meio da FastAPI autenticada existente
+e reutiliza o compositor integrado da Etapa 19.
+
+Homologacao local concluida:
+
+- Queue 12: versao historica bloqueada.
+- Queue 13: processamento MOCK e relatorio WF-05.
+- Integridade: VERIFIED_IN_MEMORY.
+- Cache e registro temporario: repeticao idempotente.
+- Ollama real, persistencia de resultado e despacho: nao executados.
+
+A regressao local pode ser repetida com a FastAPI ativa:
+
+```powershell
+.\scripts\run-local-integrated-regression.ps1
+```
+
+O runner recupera temporariamente o token DPAPI e executa
+`local_integrated_regression.py` e `local_runtime_regression.py`.
+
+A nova suite `test_local_runtime_composer.py` acrescenta
+seis testes offline, elevando o CI planejado para
+**20 suites e 192 testes**. A aprovacao remota desta
+ampliacao ainda depende da publicacao.
+
+O n8n corporativo utiliza interface web e permanece
+sem integracao direta homologada com a FastAPI local.
+Nao expor a ponte localhost publicamente.
 
 ### Documentos de governanca
 

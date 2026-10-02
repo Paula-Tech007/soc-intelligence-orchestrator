@@ -35,7 +35,7 @@ try {
 
     if (
         $LASTEXITCODE -ne 0 -or
-        $branch -notin @("feat/automated-integration-regression", "main")
+        $branch -notin @("feat/automated-integration-regression", "feat/runtime-database-local-consumer", "main")
     ) {
         throw "Branch da Etapa 12 nao esta ativa."
     }
@@ -106,6 +106,20 @@ try {
     if ($LASTEXITCODE -ne 0) {
         throw "Regressao integrada local reprovada."
     }
+
+    Write-Host "`n=== 3B. REGRESSAO DINAMICA FASE 08 ===" `
+        -ForegroundColor Cyan
+
+    & $python -m unittest discover `
+        -s tests `
+        -p "local_runtime_regression.py" `
+        -v
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Regressao dinamica Fase 08 reprovada."
+    }
+
+    Write-Host "[OK] Regressao dinamica aprovada."
 
     Write-Host "`n[OK] REGRESSAO INTEGRADA APROVADA!" `
         -ForegroundColor Green

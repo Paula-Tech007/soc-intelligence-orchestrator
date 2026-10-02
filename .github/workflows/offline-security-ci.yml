@@ -46,9 +46,15 @@ jobs:
           python - <<'PY'
           from fnmatch import fnmatch
 
-          local_test = "local_integrated_regression.py"
+          local_tests = (
+              "local_integrated_regression.py",
+              "local_runtime_regression.py",
+          )
 
-          assert not fnmatch(local_test, "test_*.py")
+          assert all(
+              not fnmatch(test, "test_*.py")
+              for test in local_tests
+          )
 
           print("[OK] Local integration excluded from test_*.py.")
           print("[OK] No DPAPI or PostgreSQL required.")
@@ -184,4 +190,11 @@ jobs:
           python -m unittest discover \
             -s tests \
             -p "test_local_mock_composer.py" \
+            -v
+
+      - name: Run local runtime consumer offline tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_local_runtime_composer.py" \
             -v
