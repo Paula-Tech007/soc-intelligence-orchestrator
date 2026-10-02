@@ -1,0 +1,9 @@
+# SOC Intelligence Orchestrator - Offline Security CI
+# Ambiente homologado: Python 3.12
+# Dependencias diretas com versoes controladas.
+
+fastapi==0.142.2
+httpx==0.28.1
+langchain-core==1.6.6
+langchain-ollama==1.1.0
+psycopg[binary]==3.3.6

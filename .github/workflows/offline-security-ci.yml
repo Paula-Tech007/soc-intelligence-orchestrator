@@ -1,0 +1,111 @@
+name: Offline Security CI
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-regression:
+    name: Offline regression - Python 3.12
+
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Configure Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-ci.txt
+
+      - name: Install offline test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-ci.txt
+          python -m pip check
+
+      - name: Verify local integration isolation
+        run: |
+          python - <<'PY'
+          from fnmatch import fnmatch
+
+          local_test = "local_integrated_regression.py"
+
+          assert not fnmatch(local_test, "test_*.py")
+
+          print("[OK] Local integration excluded from test_*.py.")
+          print("[OK] No DPAPI or PostgreSQL required.")
+          PY
+
+      - name: Run bridge security tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_bridge_*.py" \
+            -v
+
+      - name: Run authenticated HTTP client tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_local_http_client.py" \
+            -v
+
+      - name: Run Context Decision Gate tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_decision_gate.py" \
+            -v
+
+      - name: Run local decision pipeline tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_local_decision_pipeline.py" \
+            -v
+
+      - name: Run AI Review Adapter tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_ai_review_adapter.py" \
+            -v
+
+      - name: Run MOCK AI Orchestrator tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_ai_review_orchestrator.py" \
+            -v
+
+      - name: Run SHA-256 integrity tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_ai_review_integrity.py" \
+            -v
+
+      - name: Run offline integrated regression
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_integrated_mock_regression.py" \
+            -v
