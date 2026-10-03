@@ -212,3 +212,22 @@ do CI offline de 210/210 testes.
 A consulta autenticada foi testada localmente, fora do CI.
 A nova suite offline nao depende de Docker, DPAPI, n8n ou Ollama.
 Este incremento permanece dentro da Fase 09 do roteiro original.
+
+## Fase 09 - Exclusao local entre workers
+
+- [x] Bloqueio exclusivo local implementado para LAB-0001.
+- [x] Nove testes iniciais de contrato e concorrencia aprovados.
+- [x] Teste multiprocesso independente incorporado a suite.
+- [x] Bloqueio liberado apos sucesso e excecao.
+- [x] Recuperacao apos encerramento abrupto comprovada.
+- [x] Falha de infraestrutura distinguida de bloqueio ocupado.
+- [x] Regressao especifica: 13/13 testes aprovados localmente.
+- [x] Regressao local consolidada: 25 suites / 235 testes, zero falhas.
+- [ ] Confirmar GitHub Actions remoto apos publicacao.
+- [ ] Implementar reserva persistente QUEUED -> PROCESSING.
+- [ ] Homologar protocolo contra consumidores distribuidos.
+
+Limite: o bloqueio local coordena processos participantes que
+compartilham o mesmo sistema de arquivos. Nao representa reserva
+atomica da Data Table nem concede permissao para executar Ollama.
+A solicitacao sintetica permanece QUEUED no n8n LAB.
