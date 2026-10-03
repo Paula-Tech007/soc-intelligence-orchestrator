@@ -75,6 +75,13 @@ jobs:
             -p "test_local_http_client.py" \
             -v
 
+      - name: Run n8n LAB queue client offline tests
+        run: |
+          python -m unittest discover \
+            -s tests \
+            -p "test_n8n_runtime_queue_client.py" \
+            -v
+
       - name: Run Context Decision Gate tests
         run: |
           python -m unittest discover \

@@ -191,3 +191,24 @@ Despacho operacional e notificacoes reais desabilitados.
 Evidencias tecnicas: docs/PHASE09_N8N_LAB_REPORT_RECEIVER.md.
 Os testes HTTP sao manuais do LAB e nao alteram a contagem
 do CI offline de 210/210 testes.
+
+## Fase 09 - Worker n8n LAB DRY_RUN
+
+- [x] Data Table soc_lab_runtime_requests criada no n8n LAB.
+- [x] Solicitacao sintetica SOC-LAB-0001-Q12-Q13 registrada.
+- [x] Deduplicacao sequencial homologada: apenas uma linha.
+- [x] Consulta HTTP sem Header Auth bloqueada com 403.
+- [x] Consulta autenticada homologada com HTTP 200.
+- [x] Worker Python somente leitura implementado em DRY_RUN.
+- [x] Doze testes offline do consumidor aprovados localmente.
+- [x] Consulta Python -> n8n LAB homologada com filas 12/13.
+- [x] Registro original preservado com status QUEUED.
+- [x] Nenhuma execucao do Ollama ou alteracao da Data Table.
+- [x] Regressao local consolidada: 24 suites / 222 testes, zero falhas.
+- [ ] Implementar reserva concorrente QUEUED -> PROCESSING.
+- [ ] Homologar worker com processamento Python autorizado.
+- [ ] Homologar E2E dinamico corporativo quando autorizado.
+
+A consulta autenticada foi testada localmente, fora do CI.
+A nova suite offline nao depende de Docker, DPAPI, n8n ou Ollama.
+Este incremento permanece dentro da Fase 09 do roteiro original.
