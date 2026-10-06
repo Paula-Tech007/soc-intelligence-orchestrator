@@ -1,4 +1,4 @@
-"""
+﻿"""
 SOC Intelligence Orchestrator
 WF-03 - Contexto e Correlacao
 
@@ -17,6 +17,28 @@ sys.path.insert(0, str(ROOT))
 from src.dedup.persistence import connect_db
 
 
+def _ioc_identity(ioc):
+    """Gera identidade deterministica para correlacao de IOC."""
+
+    fingerprint = ioc.get("fingerprint")
+
+    if isinstance(fingerprint, str) and fingerprint:
+        return f"fingerprint:{fingerprint}"
+
+    ioc_type = ioc.get("type")
+    value = ioc.get("value")
+
+    if (
+        isinstance(ioc_type, str)
+        and ioc_type
+        and isinstance(value, str)
+        and value
+    ):
+        return f"value:{ioc_type}:{value}"
+
+    return None
+
+
 def indicators(event):
     """Extrai indicadores presentes no evento informado."""
 
@@ -24,6 +46,7 @@ def indicators(event):
 
     ips = set()
     hosts = set()
+    iocs = {}
 
     for field in ("src_ip", "dst_ip"):
         value = entity.get(field)
@@ -44,7 +67,37 @@ def indicators(event):
             if isinstance(value, str) and value
         )
 
+    # IOC canonico produzido pelo novo pipeline.
+    ioc_type = entity.get("ioc_type")
+    ioc_value = entity.get("ioc_value")
+    ioc_fingerprint = entity.get("ioc_fingerprint")
+
+    if (
+        isinstance(ioc_type, str)
+        and ioc_type
+        and isinstance(ioc_value, str)
+        and ioc_value
+    ):
+        ioc = {
+            "type": ioc_type,
+            "value": ioc_value,
+            "fingerprint": (
+                ioc_fingerprint
+                if isinstance(ioc_fingerprint, str)
+                and ioc_fingerprint
+                else None
+            ),
+        }
+
+        identity = _ioc_identity(ioc)
+
+        if identity:
+            iocs[identity] = ioc
+
     for evidence in event.get("evidence", []):
+
+        if not isinstance(evidence, dict):
+            continue
 
         for field in ("src_ip", "dst_ip"):
             value = evidence.get(field)
@@ -57,10 +110,78 @@ def indicators(event):
         if isinstance(hostname, str) and hostname:
             hosts.add(hostname)
 
+        # Permite futura evidencia que carregue IOC diretamente.
+        evidence_ioc_type = evidence.get("ioc_type")
+        evidence_ioc_value = evidence.get("ioc_value")
+        evidence_ioc_fingerprint = evidence.get(
+            "ioc_fingerprint"
+        )
+
+        if (
+            isinstance(evidence_ioc_type, str)
+            and evidence_ioc_type
+            and isinstance(evidence_ioc_value, str)
+            and evidence_ioc_value
+        ):
+            ioc = {
+                "type": evidence_ioc_type,
+                "value": evidence_ioc_value,
+                "fingerprint": (
+                    evidence_ioc_fingerprint
+                    if isinstance(
+                        evidence_ioc_fingerprint,
+                        str,
+                    )
+                    and evidence_ioc_fingerprint
+                    else None
+                ),
+            }
+
+            identity = _ioc_identity(ioc)
+
+            if identity:
+                iocs[identity] = ioc
+
     return {
         "ips": sorted(ips),
         "hostnames": sorted(hosts),
+        "iocs": [
+            iocs[key]
+            for key in sorted(iocs)
+        ],
     }
+
+
+def _shared_iocs(current, candidate):
+    """Retorna IOCs em comum entre dois conjuntos."""
+
+    current_map = {}
+
+    for ioc in current:
+        identity = _ioc_identity(ioc)
+
+        if identity:
+            current_map[identity] = ioc
+
+    candidate_keys = {
+        identity
+        for identity in (
+            _ioc_identity(ioc)
+            for ioc in candidate
+        )
+        if identity
+    }
+
+    common_keys = sorted(
+        set(current_map).intersection(
+            candidate_keys
+        )
+    )
+
+    return [
+        current_map[key]
+        for key in common_keys
+    ]
 
 
 def build_context(queue_id, *, connection_factory=None):
@@ -144,8 +265,17 @@ def build_context(queue_id, *, connection_factory=None):
 
             related = []
 
-            current_ips = set(event_indicators["ips"])
-            current_hosts = set(event_indicators["hostnames"])
+            current_ips = set(
+                event_indicators["ips"]
+            )
+
+            current_hosts = set(
+                event_indicators["hostnames"]
+            )
+
+            current_iocs = event_indicators[
+                "iocs"
+            ]
 
             for candidate in cursor.fetchall():
 
@@ -161,23 +291,39 @@ def build_context(queue_id, *, connection_factory=None):
 
                 common_hosts = sorted(
                     current_hosts.intersection(
-                        candidate_indicators["hostnames"]
+                        candidate_indicators[
+                            "hostnames"
+                        ]
                     )
                 )
 
-                if common_ips or common_hosts:
+                common_iocs = _shared_iocs(
+                    current_iocs,
+                    candidate_indicators["iocs"],
+                )
+
+                if (
+                    common_ips
+                    or common_hosts
+                    or common_iocs
+                ):
 
                     related.append({
                         "source_event_id":
                             candidate["source_event_id"],
-                        "common_ips": common_ips,
-                        "common_hostnames": common_hosts,
+                        "common_ips":
+                            common_ips,
+                        "common_hostnames":
+                            common_hosts,
+                        "common_iocs":
+                            common_iocs,
                         "relation_type":
                             "SHARED_INDICATORS",
                     })
 
             related.sort(
-                key=lambda item: item["source_event_id"]
+                key=lambda item:
+                    item["source_event_id"]
             )
 
             # Limite de itens no contexto.
@@ -192,13 +338,16 @@ def build_context(queue_id, *, connection_factory=None):
                 "investigation_id": str(
                     row["investigation_id"]
                 ),
-                "source_event_id": row["source_event_id"],
+                "source_event_id":
+                    row["source_event_id"],
                 "requested_version":
                     row["requested_version"],
                 "current_version":
                     row["current_version"],
-                "is_historical_version": historical,
-                "eligible_for_context_review": eligible,
+                "is_historical_version":
+                    historical,
+                "eligible_for_context_review":
+                    eligible,
                 "context_status": (
                     "HISTORICAL_VERSION"
                     if historical
@@ -222,9 +371,12 @@ def build_context(queue_id, *, connection_factory=None):
                     "matches": related,
                 },
                 "provenance": {
-                    "database": "soc_intelligence",
-                    "table": "investigation_versions",
-                    "version": row["requested_version"],
+                    "database":
+                        "soc_intelligence",
+                    "table":
+                        "investigation_versions",
+                    "version":
+                        row["requested_version"],
                     "content_signature":
                         row["content_signature"],
                 },
@@ -242,7 +394,9 @@ def main():
             "<queue_id>"
         )
 
-    context = build_context(int(sys.argv[1]))
+    context = build_context(
+        int(sys.argv[1])
+    )
 
     print(
         json.dumps(
